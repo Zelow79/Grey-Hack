@@ -1,0 +1,36 @@
+//file locating
+comp = get_shell.host_computer
+crypto = include_lib("/lib/crypto.so")
+bank2get = comp.File("Bank.txt")
+mail2get = comp.File("Mail.txt")
+//locate files for cracked data to go
+bankC = comp.File("BankCracked.txt")
+mailC = comp.File("MailCracked.txt")
+//input = file with passwords to decipher, output = file decrypted keys are stored
+process = function(input, output)
+	print(input.name + " " + input.get_content.split(char(10)).len + " entries found.") 
+	i = 0
+	x = 0 //successful transfers
+	for lines in input.get_content.split(char(10))
+		if lines.split(":").len != 2 then
+			print(input.name + "[" + i + "] skipped invalid format")
+			i = i + 1
+			continue
+		end if
+		print("Deciphering " + input.path + "[" + i + "]")
+		result = crypto.decipher(lines.split(":")[1])
+		print("Result - " +lines.split(":")[0] + ": " + result)
+		if result then 
+			output.set_content(output.get_content + char(10) + lines.split(":")[0] + ": " + result)
+			x = x + 1
+		end if
+		i = i + 1
+	end for
+	if x > 0 then print("Decrypted " + x + " " + input.name + " entries successfully.")
+	if x > 0 then print("Logged @" + output.path)
+	print("End of " + input.name + " entries")
+end function
+//process bank2get info first
+process(bank2get, bankC)
+//process mail2get info
+process(mail2get, mailC)
