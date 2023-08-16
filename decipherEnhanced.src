@@ -8,39 +8,54 @@
 // $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
 // \________|\_______|\__| \______/  \_____\____/ 
 //                                        
-//file locating
 comp = get_shell.host_computer
 crypto = include_lib("/lib/crypto.so")
-bank2get = comp.File("Bank.txt")
-mail2get = comp.File("Mail.txt")
+if not crypto then exit("crypto.so library not found. \nTerminating....")
+//create files to put data to be cracked in if needed
+comp.touch(current_path, "Bank.txt")
+comp.touch(current_path, "Mail.txt")
+comp.touch(current_path, "passwd")
+//file locating
+bank2get = comp.File(current_path + "/Bank.txt")
+mail2get = comp.File(current_path + "/Mail.txt")
+pswd2get = comp.File(current_path + "/passwd")
+//create files for cracked data if needed
+comp.touch(current_path, "BankCracked.txt")
+comp.touch(current_path, "MailCracked.txt")
+comp.touch(current_path, "passwdCracked.txt")
 //locate files for cracked data to go
-bankC = comp.File("BankCracked.txt")
-mailC = comp.File("MailCracked.txt")
+bankC = comp.File(current_path + "/BankCracked.txt")
+mailC = comp.File(current_path + "/MailCracked.txt")
+pswdC = comp.File(current_path + "/passwdCracked.txt")
 //input = file with passwords to decipher, output = file decrypted keys are stored
 process = function(input, output)
-	print(input.name + " " + input.get_content.split(char(10)).len + " entries found.") 
+	print("Starting protocol on " + input.path + " please wait...")
+	print(input.get_content.split(char(10)).len + " entries found.") 
 	i = 0
 	x = 0 //successful transfers
 	for lines in input.get_content.split(char(10))
 		if lines.split(":").len != 2 then
-			print(input.name + "[" + i + "] skipped invalid format")
+			print(input.name + "-[" + i + "] was skipped invalid format")
 			i = i + 1
 			continue
 		end if
-		print("Deciphering " + input.path + "[" + i + "]")
+		print("Deciphering " + input.path + "-[" + i + "]")
 		result = crypto.decipher(lines.split(":")[1])
-		print("Result - " +lines.split(":")[0] + ": " + result)
+		print("UsrName:Pswd " +lines.split(":")[0] + ": " + result)
 		if result then 
+			//if result is not null append to bottom of output
 			output.set_content(output.get_content + char(10) + lines.split(":")[0] + ": " + result)
 			x = x + 1
 		end if
 		i = i + 1
 	end for
-	if x > 0 then print("Decrypted " + x + " " + input.name + " entries successfully.")
+	if x > 0 then print("Deciphered " + x + " " + input.name + " entries successfully.")
 	if x > 0 then print("Logged @" + output.path)
 	print("End of " + input.name + " entries")
 end function
 //process bank2get info first
 process(bank2get, bankC)
+//process pswd2get info
+process(pswd2get, pswdC)
 //process mail2get info
 process(mail2get, mailC)
