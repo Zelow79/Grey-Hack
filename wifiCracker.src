@@ -1,0 +1,25 @@
+crypto = include_lib("/lib/crypto.so")
+computer = get_shell.host_computer
+wifi = "wlan0"
+wifiFile = "wifi_pswds.txt"
+computer.touch(current_path, wifiFile)
+file = computer.File(current_path + "/" + wifiFile)
+listen = crypto.airmon("start", wifi)
+networks = computer.wifi_networks(wifi)
+info = "BSSID PWR ESSID PSWD"
+
+if computer.network_devices.indexOf(wifi) != null then //check network type if wifi proceed
+	for network in networks
+		//if network.split(" ")[1].remove("%").to_int < 30 then continue //skip slower targets
+		crypto.aireplay(network.split(" ")[0], network.split(" ")[2], ceil(300000/network.split(" ")[1].remove("%").to_int))
+		x = computer.File(home_dir() + "/file.cap")
+		if x == null then exit("aircrack: file not found: ")
+		pswd = crypto.aircrack(x.path)
+		info = info + char(10) + network + " " + pswd
+		wait()
+	end for
+	wait()
+end if
+
+file.set_content(format_columns(info))
+print(format_columns(info))
