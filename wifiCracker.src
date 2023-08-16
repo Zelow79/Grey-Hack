@@ -23,7 +23,7 @@ if computer.network_devices.indexOf(wifi) != null then //check network type if w
 		pwr = network.split(" ")[1].remove("%").to_int
 		if pwr < 10 then continue //skip slower targets
 		crypto.aireplay(network.split(" ")[0], network.split(" ")[2], ceil(300000/pwr))
-		wait() //hoping a wait between "file.cap" creation locating may help crash
+		wait() //hoping a wait between "file.cap" creation and locating may help prevent crash
 		x = computer.File(home_dir() + "/file.cap")
 		if x == null then exit("aircrack: file not found: ")
 		pswd = crypto.aircrack(x.path)
