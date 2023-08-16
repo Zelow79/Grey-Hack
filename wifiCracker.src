@@ -20,15 +20,15 @@ info = "BSSID PWR ESSID PSWD"
 
 if computer.network_devices.indexOf(wifi) != null then //check network type if wifi proceed
 	for network in networks
-		//if network.split(" ")[1].remove("%").to_int < 30 then continue //skip slower targets
-		crypto.aireplay(network.split(" ")[0], network.split(" ")[2], ceil(300000/network.split(" ")[1].remove("%").to_int))
+		pwr = network.split(" ")[1].remove("%").to_int
+		if pwr < 10 then continue //skip slower targets
+		crypto.aireplay(network.split(" ")[0], network.split(" ")[2], ceil(300000/pwr))
+		wait() //hoping a wait between "file.cap" creation locating may help crash
 		x = computer.File(home_dir() + "/file.cap")
 		if x == null then exit("aircrack: file not found: ")
 		pswd = crypto.aircrack(x.path)
 		info = info + char(10) + network + " " + pswd
-		wait()
 	end for
-	wait()
 end if
 
 file.set_content(format_columns(info))
