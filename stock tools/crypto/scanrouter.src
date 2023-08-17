@@ -1,0 +1,23 @@
+//command: scanrouter
+if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit(command_info("scanrouter_usage"))
+ipAddress = params[0]
+
+router = get_router( ipAddress )
+if router == null then exit("scanrouter: ip address not found")
+print("Connecting to router at address: " + ipAddress + "\nScanning kernel library...")
+version = router.kernel_version
+if not version then
+	print("Warning: kernel_router.so not found")
+else 
+	print("kernel_router.so : v" + version)
+end if
+
+firewall_rules = router.firewall_rules
+if typeof(firewall_rules) == "string" then exit(firewall_rules)
+print("\nScanning firewall rules...")
+if firewall_rules.len == 0 then exit("No rules found.")
+info = "ACTION PORT SOURCE_IP DESTINATION_IP"
+for rules in firewall_rules
+	info = info + "\n" + rules
+end for
+print(format_columns(info) + "\n")

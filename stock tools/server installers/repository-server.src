@@ -1,0 +1,14 @@
+//command: repository-server
+repod = include_lib("/lib/librepository.so")
+if not repod then
+    repod = include_lib(current_path + "/librepository.so")
+end if
+if not repod then    
+    get_shell.launch("/bin/apt-get", "update")
+    get_shell.launch("/bin/apt-get", "install librepository.so")
+    repod = include_lib("/lib/librepository.so")
+end if
+if not repod then exit("Error: Missing librepository.so library in the /lib path or the current folder")
+output = repod.install_service
+if output != true then exit(output)
+print("<b>Type 'Browser.exe " + get_router.local_ip + ":8080' to access the router configuration to make sure the service it's accesible</b>")

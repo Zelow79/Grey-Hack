@@ -1,0 +1,29 @@
+//command scanlib
+if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit(command_info("scanlib_usage"))
+metaxploit = include_lib("/lib/metaxploit.so")
+if not metaxploit then exit("Error: Missing metaxploit library")
+libFile = get_shell.host_computer.File(params[0])
+if not libFile then exit("can't find library: " + params[0])
+print("Scanning memory address...")
+metaLib = metaxploit.load(libFile.path)
+listMem = metaxploit.scan(metaLib)
+index = 1
+for itemMem in listMem
+	print(index +": [" + itemMem + "]")
+	index = index + 1
+end for
+if listMem.len == 0 then exit("Scan completed: No issues detected.")
+
+print("Scan completed: detected issues in " + listMem.len + " memory zones.")
+option = ""
+inputOk = false
+while( not inputOk )
+	option = user_input("Select memory index: ").to_int
+	if typeof(option) != "number" or (option < 1 or option > listMem.len) then
+		print("Invalid input. Type a valid number")
+	else 
+		inputOk = true
+	end if
+end while
+print("Scanning for vulnerabilities at memory zone: " + listMem[option - 1])
+print(metaxploit.scan_address(metaLib, listMem[option - 1]))

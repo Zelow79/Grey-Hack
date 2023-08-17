@@ -1,0 +1,14 @@
+//command: http-server
+httpd = include_lib("/lib/libhttp.so")
+if not httpd then
+    httpd = include_lib(current_path + "/libhttp.so")
+end if
+if not httpd then    
+    get_shell.launch("/bin/apt-get", "update")
+    get_shell.launch("/bin/apt-get", "install libhttp.so")
+    httpd = include_lib("/lib/libhttp.so")
+end if
+if not httpd then exit("Error: Missing libhttp.so library in the /lib path or the current folder")
+output = httpd.install_service
+if output != true then exit(output)
+print("<b>Type 'Browser.exe " + get_router.local_ip + ":8080' to access the router configuration to make sure the service it's accesible</b>")

@@ -1,0 +1,14 @@
+//command: ssh-server
+sshd = include_lib("/lib/libssh.so")
+if not sshd then
+    sshd = include_lib(current_path + "/libssh.so")
+end if
+if not sshd then    
+    get_shell.launch("/bin/apt-get", "update")
+    get_shell.launch("/bin/apt-get", "install libssh.so")
+    sshd = include_lib("/lib/libssh.so")
+end if
+if not sshd then exit("Error: Missing libssh.so library in the /lib path or the current folder")
+output = sshd.install_service
+if output != true then exit(output)
+print("<b>Type 'Browser.exe " + get_router.local_ip + ":8080' to access the router configuration to make sure the service it's accesible</b>")
