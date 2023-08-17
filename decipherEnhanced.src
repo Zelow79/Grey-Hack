@@ -10,25 +10,38 @@
 //                                        
 comp = get_shell.host_computer
 crypto = include_lib("/lib/crypto.so")
-if not crypto then exit("crypto.so library not found. \nTerminating....")
-//create files to put data to be cracked in if needed
-comp.touch(current_path, "Bank.txt")
-comp.touch(current_path, "Mail.txt")
-comp.touch(current_path, "passwd")
+//create files if needed
+files = ["Bank.txt", "Mail.txt", "passwd", "Passwords.txt", "BankCracked.txt", "MailCracked.txt", "passwdCracked.txt"]
+for file in files
+	comp.touch(current_path, file)
+end for
 //file locating
 bank2get = comp.File(current_path + "/Bank.txt")
 mail2get = comp.File(current_path + "/Mail.txt")
 pswd2get = comp.File(current_path + "/passwd")
-//create files for cracked data if needed
-comp.touch(current_path, "BankCracked.txt")
-comp.touch(current_path, "MailCracked.txt")
-comp.touch(current_path, "passwdCracked.txt")
 //locate files for cracked data to go
 bankC = comp.File(current_path + "/BankCracked.txt")
 mailC = comp.File(current_path + "/MailCracked.txt")
 pswdC = comp.File(current_path + "/passwdCracked.txt")
+passB = comp.File(current_path + "/Passwords.txt")
+
+check = function(value)
+	for line in passB.get_content.split(char(10))
+		if line.split(":")[1] == value then return line.split(":")[0]
+	end for
+	return false
+end function
+
 //input = file with passwords to decipher, output = file decrypted keys are stored
 process = function(input, output)
+	stampoutput = function(left, right)
+		for line in output.get_content.split(char(10))
+			if line == left + ": " + right then return false
+		end for
+		//append to bottom of output
+		output.set_content(output.get_content + char(10) + lines.split(":")[0] + ": " + right)
+		print("/" + output.name + " logged: " + lines.split(":")[0] + ": " + right)
+	end function
 	print("Starting protocol on " + input.path + " please wait...")
 	print(input.get_content.split(char(10)).len + " entries found.") 
 	i = 0
@@ -39,13 +52,20 @@ process = function(input, output)
 			i = i + 1
 			continue
 		end if
-		print("Deciphering " + input.path + "-[" + i + "]")
-		result = crypto.decipher(lines.split(":")[1])
-		print("UsrName:Pswd " +lines.split(":")[0] + ": " + result)
-		if result then 
-			//if result is not null append to bottom of output
-			output.set_content(output.get_content + char(10) + lines.split(":")[0] + ": " + result)
-			x = x + 1
+		if check(lines.split(":")[1]) then 
+			print("Pass in bank: " + check(lines.split(":")[1]) + " hardware saved!")
+			stampoutput(lines.split(":")[0], check(lines.split(":")[1]))
+		else
+			print("Deciphering " + input.path + "-[" + i + "]")
+			result = crypto.decipher(lines.split(":")[1])
+			print("UsrName:Pswd " + lines.split(":")[0] + ": " + result)
+			if result then 
+				//if result is not null append to bottom of output
+				stampoutput(lines.split(":")[0], result)
+				//log password in password bank
+				passB.set_content(passB.get_content + char(10) + result + ":" + md5(result))
+				x = x + 1
+			end if
 		end if
 		i = i + 1
 	end for
