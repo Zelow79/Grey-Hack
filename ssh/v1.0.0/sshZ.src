@@ -1,0 +1,73 @@
+//requires port 22 on victum, gets Bank.txt, Mail.txt and passwd contents
+//and adds them the home_dir + "/yoinked/" in folders of the same name
+//then it checks password bank for pass hash, if not then it deciphers it
+//after deciphering it adds the pass with hash to password bank
+//then connects to server ip as root. Requires libssh.so v1.0.0 
+if params.len != 1 or not is_valid_ip(params[0]) then exit("<b>Usage: " + program_path.split("/")[-1] + " [ip address]</b>")
+mypc = get_shell
+comp = mypc.host_computer
+ip = params[0]
+metaxploit = include_lib("/lib/metaxploit.so")
+crypto = include_lib("/lib/crypto.so")
+mainPath = home_dir + "/" + "yoinked"
+if not metaxploit then
+    metaxploit = include_lib(current_path + "/metaxploit.so")
+end if
+if not metaxploit then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+net_session = metaxploit.net_use(ip, 22)
+if not net_session then exit("Error: can't connect to net session")
+metaLib = net_session.dump_lib
+result = metaLib.overflow("0x681A1A1D", "quotent_oncolor_b")
+//create files if needed
+comp.create_folder(home_dir + "/" + active_user + "/", "yoinked")
+files = ["Bank.txt", "Mail.txt", "passwd", "Passwords.txt"]
+for file in files
+	comp.touch(mainPath, file)
+end for
+//file locating
+bank2get = comp.File(mainPath + "/Bank.txt")
+mail2get = comp.File(mainPath + "/Mail.txt")
+pswd2get = comp.File(mainPath + "/passwd")
+//locate files for cracked data to go
+passB = comp.File(mainPath + "/Passwords.txt")
+
+check = function(value)
+	for line in passB.get_content.split(char(10))
+		if line.split(":")[1] == value then return line.split(":")[0]
+	end for
+	return false
+end function
+if result then
+	for usr in result.File("/home/").get_folders
+		if usr.name == "guest" then continue
+		//get all mail and bank passwords
+		mail2get.set_content(mail2get.get_content + char(10) + result.File(usr.path + "/Config/Mail.txt").get_content)
+		bank2get.set_content(bank2get.get_content + char(10) + result.File(usr.path + "/Config/Bank.txt").get_content)
+	end for
+	pswd2get.set_content("ip " + ip + char(10) + result.File("/etc/passwd").get_content) 
+	//find root information
+	rawpass = ""
+	for line in result.File("/etc/passwd").get_content.split(char(10))
+		if line.split(":")[0] == "root" then 
+			rawpass = line.split(":")[1]
+			break
+		end if
+	end for
+	rootpass = ""
+	if check(rawpass) then 
+		print("Pass in bank: " + check(rawpass) + " hardware saved!")
+		rootpass = check(rawpass)
+	else
+		print("Deciphering root pass...")
+		result = crypto.decipher(rawpass)
+		print("Pswd: " + result)
+		if result then 
+			//log password in password bank
+			passB.set_content(passB.get_content + char(10) + result + ":" + md5(result))
+		end if
+	end if
+	remote = mypc.connect_service(ip, 22, "root", rootpass)
+	remote.start_terminal
+else
+	print("Failed.")
+end if
