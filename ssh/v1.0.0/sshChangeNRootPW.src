@@ -1,0 +1,31 @@
+// input victims IP to change a non-root users passward to '123'
+// if permissions allow, will print contents of /etc/passwd
+// finally it will get start_terminal to get shell access
+if params.len != 1 or not is_valid_ip(params[0]) then exit("<b>Usage: " + program_path.split("/")[-1] + " [ip address]</b>")
+metaxploit = include_lib("/lib/metaxploit.so")
+crypto = include_lib("/lib/crypto.so")
+if not metaxploit then
+    metaxploit = include_lib(current_path + "/metaxploit.so")
+end if
+newpass = "123"
+if not metaxploit then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+net_session = metaxploit.net_use(params[0], 22)
+if not net_session then exit("Error: can't connect to net session")
+metaLib = net_session.dump_lib
+result = metaLib.overflow("0x35B21081", "valuesaddg", newpass)
+if result then
+	print("New password set to " + newpass)
+	mypc = get_shell
+	connected = mypc.connect_service(params[0], 22, user_input("Enter Username used above: "), newpass)
+	if connected then 
+		file = connected.host_computer.File("/etc/passwd")
+		if file.has_permission("r") then
+			print(file.get_content)
+		else
+			print("passwd: No read permissions. Unable retrieve passwords.")
+		end if
+		connected.start_terminal
+	end if
+else
+	print("Failed to change a users password")
+end if
