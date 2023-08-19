@@ -1,0 +1,40 @@
+//command: sre //Stands for scan router enhanced
+if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit(command_info("scanrouter_usage"))
+ipAddress = params[0]
+
+router = get_router( ipAddress )
+if router == null then exit("scanrouter: ip address not found")
+print("Connecting to router at address: " + ipAddress + "\nScanning kernel library...")
+version = router.kernel_version
+if not version then
+	print("Warning: kernel_router.so not found")
+else 
+	print("kernel_router.so : v" + version)
+end if
+
+firewall_rules = router.firewall_rules
+if typeof(firewall_rules) == "string" then print(firewall_rules)
+print("\nScanning firewall rules...")
+if firewall_rules.len == 0 then 
+	print("No rules found.")
+else
+	info = "ACTION PORT SOURCE_IP DESTINATION_IP"
+	for rules in firewall_rules
+		info = info + "\n" + rules
+	end for
+	print(format_columns(info) + "\n")
+end if
+ports = router.device_ports(router.local_ip)
+if ports.len > 0 then
+	output = "PORT STATE SERVICE VERSION LAN"
+	for port in ports
+		output = output + char(10) + port.port_number + " "
+		if port.is_closed then
+			output = output + "CLOSED "
+		else
+			output = output + "OPEN "
+		end if
+		output = output + router.port_info(port) + " " + port.get_lan_ip
+	end for
+end if
+print(format_columns(output))
