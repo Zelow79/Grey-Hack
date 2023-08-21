@@ -1,0 +1,13 @@
+//Requires net.so v1.0.0 or less
+metaxploit = include_lib("/lib/metaxploit.so")
+if not metaxploit then
+    metaxploit = include_lib(current_path + "/metaxploit.so")
+end if
+if not metaxploit then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+lib = metaxploit.load("/lib/net.so")
+if not lib then
+	lib = metaxploit.load(current_path + "/net.so")
+end if
+if not lib then exit("Error: Can't find net.so library in the /lib path or the current folder")
+result = lib.overflow("0x6E70D08A", "odalpos", "123")
+if result then print "User password changed to 123"
