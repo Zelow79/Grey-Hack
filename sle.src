@@ -1,0 +1,22 @@
+//Takes the file name of a lib file inside /lib
+//Usage: sle [lib file] example 'libssh.so'
+if params.len != 1 then exit("Usage: sle [lib file] example 'libssh.so'")
+shell = get_shell("root", user_input("Enter Root Password: ", true))
+if not shell then exit("Invalid Password.")
+comp = shell.host_computer
+met = include_lib("/lib/metaxploit.so")
+lib = params[0]//"libssh.so"
+target = met.load("/lib/" + lib)
+if not target then exit("Library not found.")
+comp.create_folder("/", "xlib")
+fileName = lib.split(".")[0] + "-v" + target.version + "-vulx.txt"
+comp.touch("/xlib/", fileName)
+wait(0.5)
+file = comp.File("/xlib/" + fileName)
+scanr = met.scan(target)
+output = "There was " + scanr.len + " vulnerabilities found in " + lib.split(".")[0] + "-v" + target.version + char(10)
+for vul in scanr
+	output = output + char(10) + "Vulnerability: " + vul + char(10) + met.scan_address(target, vul)
+end for
+print output
+file.set_content(output)
