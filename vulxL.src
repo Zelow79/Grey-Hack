@@ -1,0 +1,23 @@
+//For testing local vulnerabilities takes lib name example: kernel_module.so
+//Usage: vilxL [libname.so] [memory address] [value]
+if params.len != 3 or params[0] == "-h" or params[0] == "--help" then exit("<b>Usage: " + program_path.split("/")[-1] + " [libname.so] [memory address] [value]</b>")
+metaxploit = include_lib("/lib/metaxploit.so")
+if not metaxploit then
+    metaxploit = include_lib(current_path + "/metaxploit.so")
+end if
+if not metaxploit then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+lib = metaxploit.load("/lib/" + params[0])
+if not lib then
+	lib = metaxploit.load(current_path + "/" + params[0])
+end if
+if not lib then exit("Error: Can't find " + params[0] + " library in the /lib path or the current folder")
+memoryAddress = params[1]
+value = params[2]
+result = lib.overflow(memoryAddress, value)
+print typeof(result)
+if typeof(result) == "number" then print result
+if typeof(result) == "file" then 
+	print result.path
+	if not result.is_folder then print result.name + " contains:" + char(10) + result.get_content
+end if
+//print result.File("/etc/passwd").get_content
