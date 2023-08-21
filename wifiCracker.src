@@ -44,5 +44,5 @@ else
 	print("Wifi card is disabled.")
 	print("Host network devices:")
 	output = "Interface Chipset Monitoring" + char(10) + computer.network_devices
-	print(format_columns(output)) //show status of network to help eplain why it failed script failed
+	print(format_columns(output)) //show status of network to help explain why script failed
 end if
