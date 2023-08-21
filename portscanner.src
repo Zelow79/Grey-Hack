@@ -1,0 +1,57 @@
+//for scanning ports for ips very WIP
+log = "PORT STATE SERVICE VERSION PUBLIC_IP LAN"
+p = 22
+portCheck = function(ip)
+	if not is_valid_ip(ip) then return null
+	if not get_shell.host_computer.is_network_active then return null
+	ipAddress = ip
+	isLanIp = is_lan_ip(ipAddress)
+	if not isLanIp then router = get_router(ipAddress)
+	if router == null then return null
+	ports = null
+	if not isLanIp then ports = router.used_ports
+	if ports == null then return null
+	if typeof(ports) == "string" then return ports
+	if(ports.len == 0) then return null
+	for port in ports
+		if port.port_number != p then continue
+		service_info = router.port_info(port)
+		lan_ips = port.get_lan_ip
+		port_status = "open"
+		if(port.is_closed and not isLanIp) then
+			port_status = "closed"
+		end if
+		return port.port_number + " " + port_status + " " + service_info + " " + ip + " " + lan_ips
+	end for
+	//return info
+end function
+
+check = function(ip)
+	x = portCheck(ip)
+	if not x then return log
+	for line in log.split(char(10))
+		if line.split(" ").len == 6 and ip == line.split(" ")[4] then return log
+	end for
+	return log + char(10) + x
+end function
+
+ips = ["141.36.200.195", "17.107.197.9", "127.80.138.39","190.45.150.221","68.152.128.104","187.34.240.42","43.209.197.123","11.13.28.236","243.95.211.221","128.132.89.33","126.145.98.239","82.84.159.100","184.88.165.85","76.123.196.201","113.51.191.89","86.44.107.199","162.253.171.156","120.106.162.104","8.85.58.6","83.188.158.17","208.90.106.219","5.81.93.101","42.159.196.222","47.160.71.191","239.64.112.238","118.197.84.233","201.155.66.79","90.242.131.184","213.229.176.251","146.111.239.162","122.20.85.21","108.205.71.141","101.156.70.36","69.115.47.210","151.55.251.199","229.28.174.51","213.172.2.253","148.223.55.137","142.22.139.30","236.160.100.68","177.227.190.251","111.2.30.50","147.105.144.162","190.172.31.183","21.131.99.194","136.199.49.152","184.112.254.124","118.26.18.178","80.249.15.116","39.79.235.17","105.119.201.255","185.31.243.118","110.98.192.202","183.160.127.199","232.33.148.80","200.95.166.29","11.224.6.253","214.157.252.166","59.145.148.210","96.57.113.49","186.22.220.216","236.40.133.33","83.231.73.63","157.8.101.116","73.233.77.252","168.203.72.35","152.73.164.16","41.114.105.92","132.140.98.246","100.70.252.14","224.161.236.164","115.104.249.187","248.153.127.217","77.233.99.100","167.248.115.68","116.25.44.103","136.243.3.107","223.104.194.151","31.212.212.214","117.231.19.178","139.203.84.15","110.108.210.144","151.99.43.31","155.252.126.34","173.12.7.210","194.242.78.254","46.142.119.43","106.42.128.204","215.107.23.29","121.128.209.68","8.191.206.30","93.22.28.201","137.114.178.65","84.103.196.168","195.90.165.159","47.245.133.166","230.207.32.8","36.94.167.113","144.56.122.206","234.91.107.93","197.43.67.248","179.144.166.59"]
+i = 0
+oldlog = ""
+while true
+	log = check(ips[i])
+	i = i + 1
+	if i == ips.len then i = 0
+	if oldlog != log then
+		//clear_screen
+		print("Started scanning port " + p + "..." + char(10) + format_columns(log) + char(10) + "Press ctrl + C to stop port scanning...", true)
+		//print(format_columns(log))
+		//print("Press ctrl + C to stop scanning...")
+		oldlog = log
+	end if
+	//wait(0.2)
+end while
+//log = log + char(10) + portCheck("141.36.200.195")
+//print format_columns(log)
+//log = log + char(10) + portCheck(22, "141.36.200.195")
+//nmap(22, "141.36.200.195")
