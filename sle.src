@@ -1,7 +1,12 @@
 //Takes the file name of a lib file inside /lib
 //Usage: sle [lib file] example 'libssh.so'
 if params.len != 1 then exit("Usage: sle [lib file] example 'libssh.so'")
-shell = get_shell("root", user_input("Enter Root Password: ", true))
+shell = ""
+if active_user == "root" then
+	shell = get_shell
+else
+	shell = get_shell("root", user_input("Enter Root Password: ", true))
+end if
 if not shell then exit("Invalid Password.")
 comp = shell.host_computer
 met = include_lib("/lib/metaxploit.so")
