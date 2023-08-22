@@ -15,8 +15,9 @@ p = 22
 if params then p = params[0].to_int
 logfilename = "port" + p + "logs.txt"
 comp = get_shell.host_computer
-touched = comp.touch(home_dir, logfilename)
-file = comp.File(home_dir + "/" +logfilename)
+comp.create_folder(home_dir, "portlogs")
+touched = comp.touch(home_dir + "/portlogs", logfilename)
+file = comp.File(home_dir + "/portlogs/" + logfilename)
 if touched == 1 then file.set_content(log)
 foundips = []
 genip = function()
