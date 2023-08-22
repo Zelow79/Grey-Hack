@@ -1,0 +1,54 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+//
+//Usage: hashbash [hash] to check bank if password exists, if it does it prints it
+//from the bank. If it does not then it deciphers it and adds it to the bank.
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
+
+string.rainbow = function()
+	colors = ["red", "blue", "white", "orange", "green", "purple", "yellow"]
+	out = []
+	for letter in self
+		out.push(letter.color(colors[ceil(rnd * colors.len - 1)]))
+	end for
+	return out.join("")
+end function
+
+if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit("<b>" + ("Usage: " + program_path.split("/")[-1] + " [hash]").rainbow() + "</b>")
+comp = get_shell.host_computer
+crypto = include_lib("/lib/crypto.so")
+passB = comp.File("/home/Zelow/yoinked/Passwords.txt")
+
+check = function(value)
+	for line in passB.get_content.split(char(10))
+		if line.split(":")[1] == value then return line.split(":")[0]
+	end for
+	return false
+end function
+
+if params[0].len != 32 then exit("Invalid hash format. Should be 32 characters long.".rainbow())
+result = check(params[0])
+
+if result then
+	outbound = "Password found in bank: " + check(params[0])
+	exit(outbound.rainbow())
+else
+	print("Deciphering hash...".rainbow())
+	pass = crypto.decipher(params[0])
+	print pass
+	if pass != null then
+		outbound = "Deciphered password: " + pass
+		print(outbound.rainbow())
+		//log password in password bank
+		passB.set_content(passB.get_content + char(10) + pass + ":" + md5(pass))
+	end if
+end if
