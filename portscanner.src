@@ -1,3 +1,13 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+// 
 //For scanning ports usage: portscanner [port?] port argument is optional. Default 22
 if params.len > 1 or (params and params[0] == "-h") or (params and params[0] == "--help") then exit("<b>Usage: " + program_path.split("/")[-1] + " [port?]</b>")
 log = "PORT STATE SERVICE VERSION PUBLIC_IP LAN"
