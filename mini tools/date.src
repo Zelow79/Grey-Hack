@@ -1,1 +1,5 @@
-print current_date
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
+
+print current_date.split("-")[0].color("white") + "-" + current_date.split("-")[1].color("purple")

@@ -1,2 +1,17 @@
-if not params then exit("")
-print params[0] + ":" + md5(params[0])
+//Usage: md5 [value]
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
+
+string.rainbow = function()
+	colors = ["red", "blue", "white", "orange", "green", "purple", "yellow"]
+	out = []
+	for letter in self
+		out.push(letter.color(colors[ceil(rnd * colors.len - 1)]))
+	end for
+	return out.join("")
+end function
+
+if not params then exit("<b>Usage: md5 [value]</b>")
+value = params[0] + ""
+print value.rainbow() + ":" + md5(value).rainbow()
