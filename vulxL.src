@@ -1,3 +1,13 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+// 
 //For testing local vulnerabilities takes lib name example: kernel_module.so
 //Usage: vilxL [libname.so] [memory address] [value]
 if params.len != 3 or params[0] == "-h" or params[0] == "--help" then exit("<b>Usage: " + program_path.split("/")[-1] + " [libname.so] [memory address] [value]</b>")
