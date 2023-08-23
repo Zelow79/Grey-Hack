@@ -8,17 +8,12 @@
 // $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
 // \________|\_______|\__| \______/  \_____\____/ 
 // 
-//For scanning ports usage: portscanner [port?] port argument is optional. Default 22
+//For scanning ports usage: portscanner [port?] port argument is optional. Default scans all.
+//Regardless of port choice all results are logged to a folder named by port.
 if params.len > 1 or (params and params[0] == "-h") or (params and params[0] == "--help") then exit("<b>Usage: " + program_path.split("/")[-1] + " [port?]</b>")
-log = "PORT STATE SERVICE VERSION PUBLIC_IP LAN"
-p = 22
+log = ["PORT STATE SERVICE VERSION PUBLIC_IP LAN"]
+p = null
 if params then p = params[0].to_int
-logfilename = "port" + p + "logs.txt"
-comp = get_shell.host_computer
-comp.create_folder(home_dir, "portlogs")
-touched = comp.touch(home_dir + "/portlogs", logfilename)
-file = comp.File(home_dir + "/portlogs/" + logfilename)
-if touched == 1 then file.set_content(log)
 foundips = []
 genip = function()
 	while 1
@@ -38,42 +33,39 @@ portCheck = function(ipAddress)
 	if not is_lan_ip(ipAddress) then ports = router.used_ports
 	if ports.len == 0 then return null
 	for port in ports
-		if port.port_number != p then continue
 		service_info = router.port_info(port)
 		lan_ips = port.get_lan_ip
 		port_status = "open"
 		if port.is_closed and not is_lan_ip(ipAddress) then
 			port_status = "closed"
 		end if
-		return port.port_number + " " + port_status + " " + service_info + " " + ipAddress + " " + lan_ips
+		x = port.port_number + " " + port_status + " " + service_info + " " + ipAddress + " " + lan_ips
+		foundips.push(ipAddress)
+		filelog(x)
+		if p and port.port_number != p then continue
+		log.push(x)
+		if oldlog.len != log.len then
+			print("Started port scanning..." + char(10) + format_columns(log.join(char(10))) + char(10) + "Press ctrl + C to stop port scanning...", true)
+			oldlog = log
+		end if
 	end for
 end function
 
 filelog = function(x)
+	logfilename = "port" + x.split(" ")[0] + "logs.txt"
+	comp = get_shell.host_computer
+	comp.create_folder(home_dir, "portlogs")
+	touched = comp.touch(home_dir + "/portlogs", logfilename)
+	file = comp.File(home_dir + "/portlogs/" + logfilename)
+	if touched == 1 then file.set_content("PORT STATE SERVICE VERSION PUBLIC_IP LAN")
 	if not file or file.get_content.split(char(10)).len == 0 then return
 	for line in file.get_content.split(char(10))
 		if line == x then return
 	end for
 	file.set_content(file.get_content + char(10) + x)
-	//file.set_content(format_columns(file.get_content)) //not sure why this wont format right
 end function
 
-check = function(ip)
-	x = portCheck(ip)
-	if not x then return log
-	for line in log.split(char(10))
-		if line.split(" ").len == 6 and ip == line.split(" ")[4] then return log
-	end for
-	foundips.push(ip)
-	filelog(x)
-	return log + char(10) + x
-end function
-
-oldlog = log
+oldlog = []
 while 1
-	log = check(genip())
-	if oldlog != log then
-		print("Started scanning port " + p + "..." + char(10) + format_columns(log) + char(10) + "Press ctrl + C to stop port scanning...", true)
-		oldlog = log
-	end if
+	portCheck(genip())
 end while
