@@ -1,0 +1,71 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+// 
+//For scanning ports usage: servicescanner [service?] service argument is optional. Default scans all.
+//Regardless of service choice all results are logged to a folder named by service.
+if params.len > 1 or (params and params[0] == "-h") or (params and params[0] == "--help") then exit("<b>Usage: " + program_path.split("/")[-1] + " [service?]</b>")
+log = ["PORT STATE SERVICE VERSION PUBLIC_IP LAN"]
+p = null
+if params then p = params[0]
+foundips = []
+genip = function()
+	while 1
+		ip = [ceil(rnd * 255), ceil(rnd * 255) ,ceil(rnd * 255 ), ceil(rnd * 255)].join(".")
+		if is_lan_ip(ip) then continue
+        if not is_valid_ip(ip) then continue
+        return ip
+    end while
+end function
+
+serveCheck = function(ipAddress)
+	for ip in foundips
+		if ip == ipAddress then return null
+	end for
+	if not is_lan_ip(ipAddress) then router = get_router(ipAddress)
+	if router == null then return null
+	if not is_lan_ip(ipAddress) then ports = router.used_ports
+	if ports.len == 0 then return null
+	for port in ports
+		service_info = router.port_info(port)
+		lan_ips = port.get_lan_ip
+		port_status = "open"
+		if port.is_closed and not is_lan_ip(ipAddress) then
+			port_status = "closed"
+		end if
+		x = port.port_number + " " + port_status + " " + service_info + " " + ipAddress + " " + lan_ips
+		foundips.push(ipAddress)
+		filelog(x)
+		if p and service_info != p then continue
+		log.push(x)
+		if oldlog.len != log.len then
+			print("Started service scanning..." + char(10) + format_columns(log.join(char(10))) + char(10) + "Press ctrl + C to stop service scanning...", true)
+			oldlog = log
+		end if
+	end for
+end function
+
+filelog = function(x)
+	logfilename = x.split(" ")[2] + ".txt"
+	comp = get_shell.host_computer
+	comp.create_folder(home_dir, "servlogs")
+	touched = comp.touch(home_dir + "/servlogs", logfilename)
+	file = comp.File(home_dir + "/servlogs/" + logfilename)
+	if touched == 1 then file.set_content("PORT STATE SERVICE VERSION PUBLIC_IP LAN")
+	if not file or file.get_content.split(char(10)).len == 0 then return
+	for line in file.get_content.split(char(10))
+		if line == x then return
+	end for
+	file.set_content(file.get_content + char(10) + x)
+end function
+
+oldlog = []
+while 1
+	serveCheck(genip())
+end while
