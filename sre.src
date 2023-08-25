@@ -12,7 +12,7 @@
 if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit(command_info("scanrouter_usage"))
 ipAddress = params[0]
 
-router = get_router( ipAddress )
+router = get_router(ipAddress)
 if router == null then exit("scanrouter: ip address not found")
 print("Connecting to router at address: " + ipAddress + "\nScanning kernel library...")
 version = router.kernel_version
