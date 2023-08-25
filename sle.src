@@ -20,9 +20,12 @@ end if
 if not shell then exit("Invalid Password.")
 comp = shell.host_computer
 met = include_lib("/lib/metaxploit.so")
+if not met then met = include_lib(current_path + "/metaxploit.so")
+if not met then exit("metaxploit.so library not found in /lib or current dir.")
 lib = params[0]//"libssh.so"
 target = met.load("/lib/" + lib)
-if not target then exit("Library not found.")
+if not target then met.load(current_path + "/" + lib)
+if not target then exit(lib + " library not found in /lib or current dir.")
 comp.create_folder("/", "xlib")
 fileName = lib.split(".")[0] + "-v" + target.version + "-vulx.txt"
 comp.touch("/xlib/", fileName)

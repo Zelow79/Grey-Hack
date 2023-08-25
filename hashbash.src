@@ -26,6 +26,8 @@ end function
 if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit("<b>" + ("Usage: " + program_path.split("/")[-1] + " [hash]").rainbow() + "</b>")
 comp = get_shell.host_computer
 crypto = include_lib("/lib/crypto.so")
+if not crypto then crypto = include_lib(current_path + "/crypto.so")
+if not crypto then exit("crypto.so not found in /lib or current dir.")
 passB = comp.File("/home/Zelow/yoinked/Passwords.txt")
 
 check = function(value)
