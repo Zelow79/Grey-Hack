@@ -1,0 +1,77 @@
+//uses /home/usr/servlogs/ssh.txt generated from servicescanner and performs
+//computer access exploits remotely via ssh
+mypc = get_shell.host_computer
+met = include_lib("/lib/metaxploit.so")
+if not met then
+    met = include_lib(current_path + "/metaxploit.so")
+end if
+if not met then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+
+//create folder if needed
+mypc.create_folder(home_dir, "yoinked")
+//create files if needed
+files = ["Bank.txt", "Mail.txt", "passwd"]
+for file in files
+	mypc.touch(home_dir + "/yoinked", file)
+end for
+//file locating
+targets = mypc.File(home_dir + "/servlogs/ssh.txt")
+bank = mypc.File(home_dir + "/yoinked/Bank.txt")
+mail = mypc.File(home_dir + "/yoinked/Mail.txt")
+pswd = mypc.File(home_dir + "/yoinked/passwd")
+
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
+
+x = function(ip, port)
+	net = met.net_use(ip, port)
+	if not net then exit("Error: can't connect to net session")
+	metaLib = net.dump_lib
+	result = metaLib.overflow("0x35B21081", "etfocuseuptimerdelec") //root level -requires user logged in
+	if not result then result = metaLib.overflow("0x642C0526", "chort~len") //guest level
+	if not result then 
+		print(ip.color("white") + ": failed to loot.".color("red"))
+		return
+	end if
+	
+	loot = function(com)
+		for folder in com.File("/home/").get_folders()
+			for file in com.File(folder.path + "/Config").get_files()
+				if file.name == "Bank.txt" then 
+					print(file.path + " was found.")
+					print(file.get_content.color("white") + " -Added to home_dir/yoinked/Bank.txt")
+					bank.set_content(bank.get_content + char(10) + file.get_content)
+				end if
+				if file.name == "Mail.txt" then
+					print(file.path + " was found.")
+					print(file.get_content.color("white") + " -Added to home_dir/yoinked/Mail.txt")
+					mail.set_content(mail.get_content + char(10) + file.get_content)
+				end if
+			end for
+		end for
+
+		for file in com.File("/etc/").get_files()
+			if file.name == "passwd" then
+				print(file.path + " was found.")
+				if not file.has_permission("r") then
+					print(file.name.color("white") + " permission denied.".color("red"))
+					break
+				end if
+				print("The following was added to home_dir/yoinked/passwd")
+				output = ip + char(10) + file.get_content
+				for line in output.split(char(10)) 
+					print(line.color("white"))
+				end for
+				pswd.set_content(pswd.get_content + char(10) + "IP " + ip + char(10) + file.get_content)
+			end if
+		end for
+	end function
+
+	loot(result)
+end function
+
+for line in targets.get_content.split(char(10))
+	if not is_valid_ip(line.split(" ")[4]) then continue
+	x(line.split(" ")[4], line.split(" ")[0].to_int)
+end for
