@@ -26,6 +26,12 @@ pswdC = comp.File(current_path + "/passwdCracked.txt")
 passB = comp.File(current_path + "/Passwords.txt")
 
 check = function(value)
+	if passB.get_content.indexOf(char(10)) == null then 
+		if not passB.get_content.indexOf(":") == null then
+			if passB.get_content.split(":")[1] == value then return passB.get_content.split(":")[0]
+		end if
+		return false
+	end if
 	for line in passB.get_content.split(char(10))
 		if line.split(":")[1] == value then return line.split(":")[0]
 	end for
