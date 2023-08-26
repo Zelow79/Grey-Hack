@@ -1,4 +1,4 @@
-//
+// 
 // $$$$$$$$\          $$\                         
 // \____$$  |         $$ |                        
 //     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
@@ -7,7 +7,10 @@
 //  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
 // $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
 // \________|\_______|\__| \______/  \_____\____/ 
-//                                        
+// 
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
 comp = get_shell.host_computer
 crypto = include_lib("/lib/crypto.so")
 //create files if needed
@@ -46,7 +49,7 @@ process = function(input, output)
 		end for
 		//append to bottom of output
 		output.set_content(output.get_content + char(10) + lines.split(":")[0] + ": " + right)
-		print("/" + output.name + " logged: " + lines.split(":")[0] + ": " + right)
+		print("/" + output.name + " logged: " + lines.split(":")[0].color("white") + ": " + right.color("white"))
 	end function
 	print("Starting protocol on " + input.path + " please wait...")
 	print(input.get_content.split(char(10)).len + " entries found.") 
@@ -59,12 +62,12 @@ process = function(input, output)
 			continue
 		end if
 		if check(lines.split(":")[1]) then 
-			print("Pass in bank: " + check(lines.split(":")[1]) + " hardware saved!")
+			print("Pass in bank: " + check(lines.split(":")[1]).color("white") + " hardware saved!")
 			stampoutput(lines.split(":")[0], check(lines.split(":")[1]))
 		else
-			print("Deciphering " + input.path + "-[" + i + "]")
+			print("Deciphering " + (input.path + "-[" + i + "]").color("white"))
 			result = crypto.decipher(lines.split(":")[1])
-			print("UsrName:Pswd " + lines.split(":")[0] + ": " + result)
+			print("UsrName:Pswd " + lines.split(":")[0].color("white") + ": " + result.color("white"))
 			if result then 
 				//if result is not null append to bottom of output
 				stampoutput(lines.split(":")[0], result)
