@@ -1,0 +1,116 @@
+//uses /home/usr/servlogs/ssh.txt generated from servicescanner and performs
+//computer access exploits remotely via ssh to get all passwords. exploits used
+//are found in home_dir
+mypc = get_shell.host_computer
+met = include_lib("/lib/metaxploit.so")
+if not met then
+    met = include_lib(current_path + "/metaxploit.so")
+end if
+if not met then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+
+//create folder if needed
+mypc.create_folder(home_dir, "yoinked")
+mypc.create_folder(home_dir, "exploitBank")
+//create files if needed
+files = ["Bank.txt", "Mail.txt", "passwd"]
+for file in files
+	mypc.touch(home_dir + "/yoinked", file)
+end for
+mypc.touch(home_dir + "/exploitBank", "sshComputer.txt")
+//file locating
+targets = mypc.File(home_dir + "/servlogs/ssh.txt")
+exploits = mypc.File(home_dir + "/exploitBank/sshComputer.txt")
+bank = mypc.File(home_dir + "/yoinked/Bank.txt")
+mail = mypc.File(home_dir + "/yoinked/Mail.txt")
+pswd = mypc.File(home_dir + "/yoinked/passwd")
+
+fileCheck = function(file1, file2) //check for matching file line
+	verdict = false
+	for line in file1.get_content.split(char(10))
+		for line2 in file2.get_content.split(char(10))
+			if line == line2 then verdict = true
+		end for
+	end for
+	return verdict
+end function
+
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
+
+x = function(ip, port)
+	net = met.net_use(ip, port)
+	if not net then exit("Error: can't connect to net session")
+	metaLib = net.dump_lib
+	result = 0
+	exqty = exploits.get_content.split(char(10)).len - 1
+	if exqty < 1 then return //if no exploits are found halt
+	print((exqty + "").color("white") + " exploits found...")
+	for line in exploits.get_content.split(char(10)) //find exploit to get Computer access
+		if result then break //break loop when we get a result
+		if line.split(" ")[0][:2] != "0x" then continue //check for memory address
+		result = metaLib.overflow(line.split(" ")[0], line.split(" ")[1])
+	end for
+	
+	if not result then //if still no result after looping all exploits halt
+		print(ip.color("white") + ": " + "failed".color("red") + "to loot.")
+		return
+	end if
+	
+	loot = function(com) //once exploit has us in get what we can.
+		for folder in com.File("/home/").get_folders()
+			for file in com.File(folder.path + "/Config").get_files()
+				if file.name == "Bank.txt" then //first hit bank accounts
+					if not file.has_permission("r") then //permission check
+						print(file.name.color("white") + " permission denied.".color("red"))
+					else
+						print(file.path.color("white") + " was found.")
+						if not fileCheck(file, bank) then //check if we already have this information logged
+							print(file.get_content.color("white") + " -Added to " + bank.path.color("yellow"))
+							bank.set_content(bank.get_content + char(10) + file.get_content) //log loot to bank
+						else //report when file is already in log
+							print(file.get_content.color("blue") + " already logged in " + bank.name.color("blue"))
+						end if
+					end if
+				end if
+				if file.name == "Mail.txt" then //then go for emails
+					if not file.has_permission("r") then //permission check
+						print(file.name.color("white") + " permission denied.".color("red"))
+					else
+						print(file.path.color("white") + " was found.")
+						if not fileCheck(file, mail) then //check if we already have this information logged
+							print(file.get_content.color("white") + " -Added to " + mail.path.color("yellow"))
+							mail.set_content(mail.get_content + char(10) + file.get_content) //log loot to mail
+						else //report when file is already in log
+							print(file.get_content.color("blue") + " already logged in " + mail.name.color("blue"))
+						end if
+					end if
+				end if
+			end for
+		end for
+
+		for file in com.File("/etc/").get_files()
+			if file.name == "passwd" then //finally go for machine passwords root and other users
+				if not file.has_permission("r") then //permission cehck
+					print(file.name.color("white") + " permission denied.".color("red"))
+					break
+				else
+					print(file.path.color("white") + " was found.")
+					output = ip + char(10) + file.get_content
+					for line in output.split(char(10)) 
+						print(line.color("white"))
+					end for
+					print("Was added to " + pswd.path.color("yellow")) //print and log loot to pswd
+					pswd.set_content(pswd.get_content + char(10) + "IP " + ip + char(10) + file.get_content)
+				end if
+			end if
+		end for
+	end function
+
+	loot(result)
+end function
+
+for line in targets.get_content.split(char(10))             //iterate targets file for ip and port information
+	if not is_valid_ip(line.split(" ")[4]) then continue    //skip if expected ip location is not a valid ip
+	x(line.split(" ")[4], line.split(" ")[0].to_int)        //perform sshCompter intrusions to hopefully use given
+end for                                                     //ip and port information to get bank, mail and passwd contents
