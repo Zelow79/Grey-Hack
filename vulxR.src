@@ -1,0 +1,39 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+// 
+//For testing remote vulnerabilities on a router
+//Usage: vulxR [memory address] [value]
+if params.len != 2 then exit("<b>Usage: "+program_path.split("/")[-1]+" [memory address] [value]</b>")
+metaxploit = include_lib("/lib/metaxploit.so")
+if not metaxploit then
+    metaxploit = include_lib(current_path + "/metaxploit.so")
+end if
+if not metaxploit then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+address = "141.36.200.195" //use the ip of your test server/router that has the lib
+lanIp = "192.168.0.2" //use the lan ip of the server you rented to be the target of the tests
+memoryAddress = params[0]
+value = params[1]
+net_session = metaxploit.net_use(address)
+if not net_session then exit("Error: can't connect to net session")
+metaLib = net_session.dump_lib
+result = metaLib.overflow(memoryAddress, value, lanIp)
+print typeof(result)
+if typeof(result) == "number" then print result
+if typeof(result) == "file" then 
+	print result.path
+	if not result.is_folder then print result.name + " contains:" + char(10) + result.get_content
+end if
+if typeof(result) == "computer" then
+	if result.File("/etc/passwd").has_permission("r") then 
+		print result.File("/etc/passwd").get_content
+	else
+		print "No passwd perms"
+	end if
+end if
