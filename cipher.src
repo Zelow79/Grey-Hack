@@ -1,0 +1,35 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+// 
+// Usage: cipher [text you want ciphered]
+cipher = function(word, secret) //takes word a word and a list of numbers
+	if not word or secret.len < 1 then return null //list must have at least 1 number
+	process = function(w, s)
+		encrypted = [] //storage for encrypted word
+		for l in w //iterate word letter by letter
+			encrypted.push(bitwise("^", l.code, s)) //convert letter to code and XOR
+		end for	
+		output = [] //storage for encrypted output
+		for n in encrypted //iterate encrypted list
+			output.push(char(n)) //convert char codes back to characters
+		end for
+		return output.join("") //return output as string
+	end function
+	
+	result = word //assign result what you want ciphered
+	for c in secret //iterate for every value in secret list
+		result = process(result, c) //scramble result secret.len times
+	end for
+	return result //return scrambled word
+end function
+//print ciphered value. ciphers 2nd arguement must be a list and must
+//contain at least one number. Should be changed to your own secret code
+//also suggested to test your code as sometimes you can get pretty wild results.
+print cipher(params.join(" "), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
