@@ -17,7 +17,7 @@ if params then p = params[0]
 foundips = []
 genip = function()
 	while 1
-		ip = [ceil(rnd * 255), ceil(rnd * 255) ,ceil(rnd * 255 ), ceil(rnd * 255)].join(".")
+		ip = [ceil(rnd * 255), ceil(rnd * 255) ,ceil(rnd * 255), ceil(rnd * 255)].join(".")
 		if is_lan_ip(ip) then continue
         if not is_valid_ip(ip) then continue
         return ip
