@@ -16,8 +16,8 @@ if not metaxploit then
     metaxploit = include_lib(current_path + "/metaxploit.so")
 end if
 if not metaxploit then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
-address = "141.36.200.195" //use the ip of your test server/router that has the lib
-lanIp = "192.168.0.2" //use the lan ip of the server you rented to be the target of the tests
+address = "1.1.1.1" //use the ip of your test server/router that has the lib
+lanIp = "192.168.0.1" //use the lan ip of the server you rented to be the target of the tests
 memoryAddress = params[0]
 value = params[1]
 net_session = metaxploit.net_use(address)
@@ -37,3 +37,4 @@ if typeof(result) == "computer" then
 		print "No passwd perms"
 	end if
 end if
+//if typeof(result) == "shell" then result.start_terminal
