@@ -1,7 +1,7 @@
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")
-colors = ["green", "blue", "purple"]
+colors = ["green", "blue", "purple", "lightblue", "red", "yellow"]
 color = colors[floor(rnd * colors.len)]
 print " ".color(color)
 print " $$$$$$$$\          $$\                         ".color(color)
