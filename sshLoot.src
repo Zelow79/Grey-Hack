@@ -63,7 +63,7 @@ x = function(ip, port)
 	end for
 	
 	if not result then //if still no result after looping all exploits halt
-		print(ip.color("white") + ": " + "failed".color("red") + "to loot.".color("purple"))
+		print(ip.color("white") + ": " + "failed".color("red") + " to loot.".color("purple"))
 		return
 	end if
 	
