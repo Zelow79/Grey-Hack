@@ -68,59 +68,62 @@ x = function(ip, port)
 	end if
 	
 	loot = function(com) //once exploit has us in get what we can.
-		for folder in com.File("/home/").get_folders()
-			for file in com.File(folder.path + "/Config").get_files()
-				if file.name == "Bank.txt" then //first hit bank accounts
-					if not file.has_permission("r") then //permission check
-						print(file.name.color("white") + " permission denied.".color("red"))
-					else
-						print(file.path.color("white") + " was found.")
-						if not fileCheck(file, bank) then //check if we already have this information logged
-							print(file.get_content.color("white") + " -Added to " + bank.path.color("yellow"))
-							bank.set_content(bank.get_content + char(10) + file.get_content) //log loot to bank
-						else //report when file is already in log
-							print(file.get_content.color("blue") + " already logged in " + bank.name.color("blue"))
+		process = function(f) //f is a file object for the file we want
+			print("Checking ".color("lightblue") + f.name.color("white") + " file...".color("purple"))
+			for folder in com.File("/home/").get_folders()
+				for file in com.File(folder.path + "/Config").get_files()
+					if file.name == f.name then //find folder we want
+						if not file.has_permission("r") then //permission check
+							print("DENIED: ".color("red") + file.path.color("yellow") + " read permission.".color("red"))
+						else
+							if not fileCheck(file, f) then //check if we already have this information logged
+								print(file.get_content.color("white") + " -Added to ".color("purple") + f.path.color("yellow"))
+								f.set_content(f.get_content + char(10) + file.get_content) //log loot to f
+							else //report when file is already in log
+								print("SKIPPED: ".color("orange") + file.get_content.split(":")[0].color("white") + " acount exists in ".color("purple") + f.path.color("yellow") + " log.".color("purple"))
+							end if
 						end if
 					end if
-				end if
-				if file.name == "Mail.txt" then //then go for emails
-					if not file.has_permission("r") then //permission check
-						print(file.name.color("white") + " permission denied.".color("red"))
-					else
-						print(file.path.color("white") + " was found.")
-						if not fileCheck(file, mail) then //check if we already have this information logged
-							print(file.get_content.color("white") + " -Added to " + mail.path.color("yellow"))
-							mail.set_content(mail.get_content + char(10) + file.get_content) //log loot to mail
-						else //report when file is already in log
-							print(file.get_content.color("blue") + " already logged in " + mail.name.color("blue"))
-						end if
-					end if
-				end if
+				end for
 			end for
-		end for
-
+		end function
+		
+		process(bank) //process getting bank files
+		process(mail) //process getting mail files
+		pfound = false
+		print("Checking ".color("lightblue") + pswd.name.color("white") + " file...".color("purple"))
 		for file in com.File("/etc/").get_files()
-			if file.name == "passwd" then //finally go for machine passwords root and other users
-				if not file.has_permission("r") then //permission cehck
-					print(file.name.color("white") + " permission denied.".color("red"))
+			if file.name == pswd.name then //finally go for machine passwords root and other users
+				pfound = true //flag value true if we find the passwd file
+				if not file.has_permission("r") then //permission check
+					print("DENIED: ".color("red") + file.path.color("yellow") + " read permissions.".color("red"))
 					break
 				else
-					print(file.path.color("white") + " was found.")
-					output = ip + char(10) + file.get_content
-					for line in output.split(char(10)) 
-						print(line.color("white"))
+					c = true //start check for this ip in log
+					for line in pswd.get_content.split(char(10)) //iterate log
+						if line == "IP " + ip then c = false //if line in log matches what this would add flag false
 					end for
-					print("Was added to " + pswd.path.color("yellow")) //print and log loot to pswd
-					pswd.set_content(pswd.get_content + char(10) + "IP " + ip + char(10) + file.get_content)
+					if c then //if flag is true and we didn't find a record make record for this ip
+						print(file.path.color("white") + " was found.")
+						output = "IP " + ip + char(10) + file.get_content
+						for line in output.split(char(10)) 
+							print(line.color("white"))
+						end for
+						print("Was added to ".color("purple") + pswd.path.color("yellow")) //print and log loot to pswd
+						pswd.set_content(pswd.get_content + char(10) + "IP " + ip + char(10) + file.get_content)
+					else
+						print("SKIPPED: ".color("orange") + ip.color("white") + ":" + " was found in ".color("purple") + pswd.path.color("yellow") + " log.".color("purple"))
+					end if
 				end if
 			end if
 		end for
+		if not pfound then print("NOTICE: ".color("blue") + pswd.name.color("white") + " was not found.".color("red"))
 	end function
 
 	loot(result)
 end function
 
-for line in targets.get_content.split(char(10))             //iterate targets file for ip and port information
-	if not is_valid_ip(line.split(" ")[4]) then continue    //skip if expected ip location is not a valid ip
-	x(line.split(" ")[4], line.split(" ")[0].to_int)        //perform sshCompter intrusions to hopefully use given
-end for                                                     //ip and port information to get bank, mail and passwd contents
+for line in targets.get_content.split(char(10)) //iterate targets file for ip and port information
+	if not is_valid_ip(line.split(" ")[4]) then continue //skip if expected ip location is not a valid ip
+	x(line.split(" ")[4], line.split(" ")[0].to_int) //perform sshCompter intrusions to hopefully use given
+end for                                              //ip and port information to get bank, mail and passwd contents
