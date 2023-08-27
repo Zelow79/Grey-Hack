@@ -55,7 +55,7 @@ x = function(ip, port)
 	result = 0
 	exqty = exploits.get_content.split(char(10)).len - 1
 	if exqty < 1 then return //if no exploits are found halt
-	print((exqty + "").color("white") + " exploits found...")
+	print((exqty + "").color("white") + " exploits found...".color("purple"))
 	for line in exploits.get_content.split(char(10)) //find exploit to get Computer access
 		if result then break //break loop when we get a result
 		if line.split(" ")[0][:2] != "0x" then continue //check for memory address
@@ -63,7 +63,7 @@ x = function(ip, port)
 	end for
 	
 	if not result then //if still no result after looping all exploits halt
-		print(ip.color("white") + ": " + "failed".color("red") + "to loot.")
+		print(ip.color("white") + ": " + "failed".color("red") + "to loot.".color("purple"))
 		return
 	end if
 	
@@ -104,7 +104,7 @@ x = function(ip, port)
 						if line == "IP " + ip then c = false //if line in log matches what this would add flag false
 					end for
 					if c then //if flag is true and we didn't find a record make record for this ip
-						print(file.path.color("white") + " was found.")
+						print(file.path.color("white") + " was found.".color("purple"))
 						output = "IP " + ip + char(10) + file.get_content
 						for line in output.split(char(10)) 
 							print(line.color("white"))
