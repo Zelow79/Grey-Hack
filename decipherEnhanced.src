@@ -49,25 +49,25 @@ process = function(input, output)
 		end for
 		//append to bottom of output
 		output.set_content(output.get_content + char(10) + lines.split(":")[0] + ": " + right)
-		print("/" + output.name + " logged: " + lines.split(":")[0].color("white") + ": " + right.color("white"))
+		print("/".color("white") + output.name.color("yellow") + " logged: ".color("purple") + lines.split(":")[0].color("orange") + ":" + right.color("lightblue"))
 	end function
-	print("Starting protocol on " + input.path + " please wait...")
-	print(input.get_content.split(char(10)).len + " entries found.") 
+	print("Starting protocol on ".color("purple") + input.path.color("yellow") + " please wait...".color("purple"))
+	print((input.get_content.split(char(10)).len + "").color("lightblue") + " entries found.".color("purple")) 
 	i = 0
 	x = 0 //successful transfers
 	for lines in input.get_content.split(char(10))
 		if lines.split(":").len != 2 then
-			print(input.name + "-[" + i + "] was skipped invalid format")
+			print(input.name.color("white") + "-[".color("lightblue") + (i + "").color("white") + "]".color("lightblue") + " was skipped invalid format".color("red"))
 			i = i + 1
 			continue
 		end if
 		if check(lines.split(":")[1]) then 
-			print("Pass in bank: " + check(lines.split(":")[1]).color("white") + " hardware saved!")
+			print("Pass in bank".color("yellow") + ": " + check(lines.split(":")[1]).color("white") + " hardware saved!".color("purple"))
 			stampoutput(lines.split(":")[0], check(lines.split(":")[1]))
 		else
-			print("Deciphering " + (input.path + "-[" + i + "]").color("white"))
+			print("Deciphering ".color("purple") + input.path.color("yellow") + "-[".color("lightblue") + (i + "").color("white") + "]".color("lightblue"))
 			result = crypto.decipher(lines.split(":")[1])
-			print("UsrName:Pswd " + lines.split(":")[0].color("white") + ": " + result.color("white"))
+			print("UsrName".color("orange") + ":" + "Pswd ".color("lightblue") + lines.split(":")[0].color("orange") + ":" + result.color("lightblue"))
 			if result then 
 				//if result is not null append to bottom of output
 				stampoutput(lines.split(":")[0], result)
@@ -78,13 +78,39 @@ process = function(input, output)
 		end if
 		i = i + 1
 	end for
-	if x > 0 then print("Deciphered " + x + " " + input.name + " entries successfully.")
-	if x > 0 then print("Logged @" + output.path)
-	print("End of " + input.name + " entries")
+	if x > 0 then print("Deciphered ".color("purple") + (x + " ").color("lightblue") + input.name.color("white") + " entries successfully.".color("purple"))
+	if x > 0 then print("Logged @".color("purple") + output.path.color("yellow"))
+	print("End of ".color("purple") + input.name + " entries".color("purple"))
 end function
-//process bank2get info first
-process(bank2get, bankC)
-//process pswd2get info
-process(pswd2get, pswdC)
-//process mail2get info
-process(mail2get, mailC)
+
+print (passB.get_content.split(char(10)).len + "").color("white") + " hashed passwords.".color("lightblue")
+print (bankC.get_content.split(char(10)).len + "").color("white") + " cracked bank passwords.".color("yellow")
+print (bank2get.get_content.split(char(10)).len + "").color("white") + " total entries in Bank.txt.".color("yellow")
+print (mailC.get_content.split(char(10)).len + "").color("white") + " cracked mail passwords.".color("orange")
+print (mail2get.get_content.split(char(10)).len + "").color("white") + " total entries in Mail.txt.".color("orange")
+print (pswdC.get_content.split(char(10)).len + "").color("white") + " cracked pswd passwords.".color("purple")
+pswdentries = 0
+for line in pswd2get.get_content.split(char(10))
+	if line[:3] == "IP " then pswdentries = pswdentries + 1
+end for
+print (pswdentries + "").color("white") + " total entries in pswd.".color("purple")
+
+print "What would you like to decipher?".color("white")
+print "1. Bank".color("yellow")
+print "2. Mail".color("orange")
+print "3. pswd".color("purple")
+print "WARN: Anything else will exit the program.".color("red")
+choice = user_input("Enter ".color("lightblue") + "number ".color("yellow") + "of ".color("orange") + "choice".color("purple") + ": ")
+
+if choice == "1" then 
+	//process bank2get info
+	process(bank2get, bankC)
+else if choice == "2" then
+	//process mail2get info
+	process(mail2get, mailC)
+else if choice == "3" then
+	//process pswd2get info
+	process(pswd2get, pswdC)
+else
+	exit("Invalid option, terminating...".color("red"))
+end if
