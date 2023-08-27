@@ -9,11 +9,11 @@
 // \________|\_______|\__| \______/  \_____\____/ 
 // 
 //command: sre //Stands for scan router enhanced
-if params.len != 1 or params[0] == "-h" or params[0] == "--help" then exit(command_info("scanrouter_usage"))
-ipAddress = params[0]
-
-router = get_router(ipAddress)
+if params.len > 1 or (params.len == 1 and params[0] == "-h") or (params.len == 1 and params[0] == "--help") then exit(command_info("scanrouter_usage"))
+router = get_router()
+if params.len > 0 then router = get_router(params[0])
 if router == null then exit("scanrouter: ip address not found")
+ipAddress = router.public_ip()
 print("Connecting to router at address: " + ipAddress + "\nScanning kernel library...")
 version = router.kernel_version
 if not version then
