@@ -34,17 +34,19 @@ else
 	end for
 	print(format_columns(info) + "\n")
 end if
-ports = router.device_ports(router.local_ip)
-if ports.len > 0 then
-	output = "PORT STATE SERVICE VERSION LAN"
-	for port in ports
-		output = output + char(10) + port.port_number + " "
-		if port.is_closed then
-			output = output + "CLOSED "
-		else
-			output = output + "OPEN "
-		end if
-		output = output + router.port_info(port) + " " + port.get_lan_ip
-	end for
-end if
+output = "PORT STATE SERVICE VERSION LAN"
+for device in router.devices_lan_ip()
+	ports = router.device_ports(device)
+	if ports.len > 0 then
+		for port in ports
+			output = output + char(10) + port.port_number + " "
+			if port.is_closed then
+				output = output + "CLOSED "
+			else
+				output = output + "OPEN "
+			end if
+			output = output + router.port_info(port) + " " + port.get_lan_ip
+		end for
+	end if
+end for
 print(format_columns(output))
