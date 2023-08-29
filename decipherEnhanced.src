@@ -1,13 +1,13 @@
-// 
-// $$$$$$$$\          $$\                         
-// \____$$  |         $$ |                        
-//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
-//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
-//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
-//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
-// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
-// \________|\_______|\__| \______/  \_____\____/ 
-// 
+//-- 
+//-- $$$$$$$$\          $$\                         
+//-- \____$$  |         $$ |                        
+//--     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//--    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//--   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//--  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+//-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+//-- \________|\_______|\__| \______/  \_____\____/ 
+//-- 
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")
@@ -24,7 +24,7 @@ process = function(input, output)
 	print((passCount(input) + "").color("lightblue") + " entries found.".color("purple"))
 	for data in prepData(input)
 		i = 0
-		x = 0 //successful transfers
+		x = 0 //--successful transfers
 		for lines in data.get_content.split(char(10))
 			if lines.split(":").len != 2 then
 				print(input.name.color("white") + "-[".color("lightblue") + (i + "").color("white") + "]".color("lightblue") + " was skipped invalid format".color("red"))
@@ -39,9 +39,9 @@ process = function(input, output)
 				result = crypto.decipher(lines.split(":")[1])
 				print("UsrName".color("orange") + ":" + "Pswd ".color("lightblue") + lines.split(":")[0].color("orange") + ":" + result.color("lightblue"))
 				if result then 
-					//if result is not null append to bottom of output
+					//--if result is not null append to bottom of output
 					stampoutput(lines.split(":")[0], result)
-					//log password in password bank
+					//--log password in password bank
 					addData(result + ":" + md5(result), HashBank)
 					x = x + 1
 				end if
@@ -70,13 +70,13 @@ print "WARN: Anything else will exit the program.".color("red")
 choice = user_input("Enter ".color("lightblue") + "number ".color("yellow") + "of ".color("orange") + "choice".color("purple") + ": ")
 
 if choice == "1" then 
-	//process bank2get info
+	//--process bank2get info
 	process(Bank, CBank)
 else if choice == "2" then
-	//process mail2get info
+	//--process mail2get info
 	process(Mail, CMail)
 else if choice == "3" then
-	//process pswd2get info
+	//--process pswd2get info
 	process(pswd, Cpswd)
 else
 	exit("Invalid option, terminating...".color("red"))

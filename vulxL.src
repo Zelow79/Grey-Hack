@@ -1,15 +1,15 @@
-// 
-// $$$$$$$$\          $$\                         
-// \____$$  |         $$ |                        
-//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
-//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
-//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
-//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
-// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
-// \________|\_______|\__| \______/  \_____\____/ 
-// 
-//For testing local vulnerabilities takes lib name example: kernel_module.so
-//Usage: vilxL [libname.so] [memory address] [value]
+//-- 
+//-- $$$$$$$$\          $$\                         
+//-- \____$$  |         $$ |                        
+//--     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//--    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//--   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//--  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+//-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+//-- \________|\_______|\__| \______/  \_____\____/ 
+//-- 
+//--For testing local vulnerabilities takes lib name example: kernel_module.so
+//--Usage: vilxL [libname.so] [memory address] [value]
 if params.len != 3 or params[0] == "-h" or params[0] == "--help" then exit("<b>Usage: " + program_path.split("/")[-1] + " [libname.so] [memory address] [value]</b>")
 metaxploit = include_lib("/lib/metaxploit.so")
 if not metaxploit then
@@ -30,4 +30,3 @@ if typeof(result) == "file" then
 	print result.path
 	if not result.is_folder then print result.name + " contains:" + char(10) + result.get_content
 end if
-//print result.File("/etc/passwd").get_content

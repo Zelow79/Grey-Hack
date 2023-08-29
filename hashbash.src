@@ -1,15 +1,15 @@
-// 
-// $$$$$$$$\          $$\                         
-// \____$$  |         $$ |                        
-//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
-//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
-//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
-//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
-// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
-// \________|\_______|\__| \______/  \_____\____/ 
-//
-//Usage: hashbash [hash] to check bank if password exists, if it does it prints it
-//from the bank. If it does not then it deciphers it and adds it to the bank.
+//-- 
+//-- $$$$$$$$\          $$\                         
+//-- \____$$  |         $$ |                        
+//--     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//--    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//--   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//--  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+//-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+//-- \________|\_______|\__| \______/  \_____\____/ 
+//-- 
+//--Usage: hashbash [hash] to check bank if password exists, if it does it prints it
+//--from the bank. If it does not then it deciphers it and adds it to the bank.
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")
@@ -50,7 +50,7 @@ else
 	if pass != null then
 		outbound = "Deciphered password: " + pass
 		print(outbound.rainbow())
-		//log password in password bank
+		//--log password in password bank
 		passB.set_content(passB.get_content + char(10) + pass + ":" + md5(pass))
 	end if
 end if

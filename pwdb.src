@@ -1,22 +1,22 @@
-// 
-// $$$$$$$$\          $$\                         
-// \____$$  |         $$ |                        
-//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
-//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
-//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
-//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
-// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
-// \________|\_______|\__| \______/  \_____\____/ 
-// 
+//-- 
+//-- $$$$$$$$\          $$\                         
+//-- \____$$  |         $$ |                        
+//--     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//--    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//--   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//--  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+//-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+//-- \________|\_______|\__| \______/  \_____\____/ 
+//-- 
 mypc = get_shell.host_computer
-charLimit = 160000  //160000 game uses 160k character limit
+charLimit = 160000  //--160000 game uses 160k character limit
 
-mypc.create_folder(home_dir, "yoinked") //create yoinked dir if needed
-clusters = ["Bank", "Mail", "pswd", "CBank", "CMail", "Cpswd", "HashBank"] //names for all the clusters
+mypc.create_folder(home_dir, "yoinked") //--create yoinked dir if needed
+clusters = ["Bank", "Mail", "pswd", "CBank", "CMail", "Cpswd", "HashBank"] //--names for all the clusters
 for cluster in clusters
-	mypc.create_folder(home_dir + "/yoinked", cluster) //create any clusters that are needed
+	mypc.create_folder(home_dir + "/yoinked", cluster) //--create any clusters that are needed
 end for
-Bank = mypc.File(home_dir + "/yoinked/Bank") //referencing folders that hold data
+Bank = mypc.File(home_dir + "/yoinked/Bank") //--referencing folders that hold data
 Mail = mypc.File(home_dir + "/yoinked/Mail")
 pswd = mypc.File(home_dir + "/yoinked/pswd")
 CBank = mypc.File(home_dir + "/yoinked/CBank")
@@ -24,10 +24,10 @@ CMail = mypc.File(home_dir + "/yoinked/CMail")
 Cpswd = mypc.File(home_dir + "/yoinked/Cpswd")
 HashBank = mypc.File(home_dir + "/yoinked/HashBank")
 
-//Terminology.
-//clusters are folders that hold the data and
-//data will refer to the files inside a cluster like Bank ie /Bank/0 Bank being the cluster
-//and 0 being the data.
+//--Terminology.
+//--clusters are folders that hold the data and
+//--data will refer to the files inside a cluster like Bank ie /Bank/0 Bank being the cluster
+//--and 0 being the data.
 passCount = function(cluster)
 	if not cluster or not cluster.is_folder then return 0
 	count = 0
@@ -53,8 +53,8 @@ getClusterCharCount = function(cluster)
 	return tally
 end function
 
-//Construct a list of data *files* from a given cluster *folder* and
-//return that list. ie [fileObj, fileObj, fileObj] or null.
+//--Construct a list of data *files* from a given cluster *folder* and
+//--return that list. ie [fileObj, fileObj, fileObj] or null.
 prepData = function(cluster)
 	if not cluster or not cluster.is_folder then return null
 	list = []
@@ -85,8 +85,8 @@ hashBash = function(value)
 	return false
 end function
 
-//Check all data in file *folder* for lineString. return true
-//if found and false otherwise. 
+//--Check all data in file *folder* for lineString. return true
+//--if found and false otherwise. 
 lineCheck = function(lineString, cluster)
 	result = false
 	for data in prepData(cluster)
@@ -115,20 +115,20 @@ addData = function(newString, cluster)
     return false
 end function
 
-//leaving stuff below for testing and debugging purposes
-//print hashBash("f22152afec12017f351f1cb7a6285863") //timber
-//addData("test1", Mail)
-//addData("test2", Mail)
-//addData("test3", Mail)
-//clear_screen()
-//print "Lines in /Bank: " + passCount(Bank)
-//print "Character count in /Bank/0: " + getDataCharCount(prepData(Bank)[0])
-//print "Character count in /Bank: " + getClusterCharCount(Bank)
-//datatestlist = []
-//for file in prepData(Bank)
-//	datatestlist.push(file.name)
-//end for
-//print "Data names in /Bank: " + datatestlist.join(", ")
-//checkTest = "fail" //linecheck intentional fail
-//print "Is """ + checkTest + """ in /Bank: " + lineCheck(checkTest, Bank)
-//print "Number of data in /Bank cluster: " + prepData(Bank).len
+//--leaving stuff below for testing and debugging purposes
+//--print hashBash("f22152afec12017f351f1cb7a6285863") //timber
+//--addData("test1", Mail)
+//--addData("test2", Mail)
+//--addData("test3", Mail)
+//--clear_screen()
+//--print "Lines in /Bank: " + passCount(Bank)
+//--print "Character count in /Bank/0: " + getDataCharCount(prepData(Bank)[0])
+//--print "Character count in /Bank: " + getClusterCharCount(Bank)
+//--datatestlist = []
+//--for file in prepData(Bank)
+//--	datatestlist.push(file.name)
+//--end for
+//--print "Data names in /Bank: " + datatestlist.join(", ")
+//--checkTest = "fail" //linecheck intentional fail
+//--print "Is """ + checkTest + """ in /Bank: " + lineCheck(checkTest, Bank)
+//--print "Number of data in /Bank cluster: " + prepData(Bank).len

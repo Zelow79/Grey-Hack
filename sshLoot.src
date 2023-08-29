@@ -1,16 +1,16 @@
-// 
-// $$$$$$$$\          $$\                         
-// \____$$  |         $$ |                        
-//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
-//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
-//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
-//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
-// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
-// \________|\_______|\__| \______/  \_____\____/ 
-// 
-//uses /home/usr/servlogs/ssh.txt generated from servicescanner and performs
-//computer access exploits remotely via ssh to get all passwords. exploits used
-//are found in home_dir
+//-- 
+//-- $$$$$$$$\          $$\                         
+//-- \____$$  |         $$ |                        
+//--     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//--    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//--   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//--  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+//-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+//-- \________|\_______|\__| \______/  \_____\____/ 
+//-- 
+//--uses /home/usr/servlogs/ssh.txt generated from servicescanner and performs
+//--computer access exploits remotely via ssh to get all passwords. exploits used
+//--are found in home_dir
 mypc = get_shell.host_computer
 met = include_lib("/lib/metaxploit.so")
 if not met then
@@ -19,19 +19,19 @@ end if
 if not met then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
 import_code("/home/Zelow/pwdb.src")
 
-//create folder if needed
+//--create folder if needed
 mypc.create_folder(home_dir, "exploitBank")
-//create files if needed
+//--create files if needed
 mypc.touch(home_dir + "/exploitBank", "sshComputer.txt")
-//file locating
+//--file locating
 exploits = mypc.File(home_dir + "/exploitBank/sshComputer.txt")
 
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")
-//foundips = [] //might track/use ip addressed found in session
+//--foundips = [] //might track/use ip addressed found in session
 
-genip = function() //generate ip
+genip = function() //--generate ip
 	while 1
 		ip = [ceil(rnd * 255), ceil(rnd * 255) ,ceil(rnd * 255), ceil(rnd * 255)].join(".")
 		if is_lan_ip(ip) then continue
@@ -40,7 +40,7 @@ genip = function() //generate ip
     end while
 end function
 
-findssh = function() //use genip to find an ip with an ssh lib
+findssh = function() //--use genip to find an ip with an ssh lib
 	while 1
 		ip = genip()
 		router = get_router(ip)
@@ -48,7 +48,7 @@ findssh = function() //use genip to find an ip with an ssh lib
 		ports = router.used_ports
 		if ports.len == 0 then continue
 		for port in ports
-			if router.port_info(port).split(" ")[0] == "ssh" then return [ip, port.port_number] //return list [ip, port]
+			if router.port_info(port).split(" ")[0] == "ssh" then return [ip, port.port_number] //--return list [ip, port]
 		end for
 	end while
 end function
@@ -59,34 +59,34 @@ x = function(ip, port)
 	metaLib = net.dump_lib
 	result = 0
 	exqty = exploits.get_content.split(char(10)).len - 1
-	if exqty < 1 then return //if no exploits are found halt
+	if exqty < 1 then return //--if no exploits are found halt
 	print((exqty + "").color("white") + " exploits found...".color("purple"))
-	for line in exploits.get_content.split(char(10)) //find exploit to get Computer access
-		if result then break //break loop when we get a result
-		if line.split(" ")[0][:2] != "0x" then continue //check for memory address
+	for line in exploits.get_content.split(char(10)) //--find exploit to get Computer access
+		if result then break //--break loop when we get a result
+		if line.split(" ")[0][:2] != "0x" then continue //--check for memory address
 		result = metaLib.overflow(line.split(" ")[0], line.split(" ")[1])
 	end for
 	
-	if not result then //if still no result after looping all exploits halt
+	if not result then //--if still no result after looping all exploits halt
 		print(ip.color("white") + ": " + "failed".color("red") + " to loot.".color("purple"))
 		return
 	end if
 	
-	loot = function(com) //once exploit has us in get what we can.
+	loot = function(com) //--once exploit has us in get what we can.
 		
 		process = function(fileName, cluster) 
 			print("Checking ".color("lightblue") + fileName.color("white") + " file...".color("purple"))
 			for folder in com.File("/home/").get_folders()
 				for file in com.File(folder.path + "/Config").get_files()
-					if file.name == fileName then //find folder we want
-						if not file.has_permission("r") then //permission check
+					if file.name == fileName then //--find folder we want
+						if not file.has_permission("r") then //--permission check
 							print("DENIED: ".color("red") + file.path.color("yellow") + " read permission.".color("red"))
 						else
 							for line in file.get_content.split(char(10))
-								if lineCheck(line, cluster) then //check if we already have this information logged
+								if lineCheck(line, cluster) then //--check if we already have this information logged
 									print(line.color("white") + " -Added to ".color("purple") + cluster.path.color("yellow"))
-									addData(line, cluster) //log loot
-								else //report when file is already in log
+									addData(line, cluster) //--log loot
+								else //--report when file is already in log
 									print("SKIPPED: ".color("orange") + line.color("white") + " acount exists in ".color("purple") + cluster.path.color("yellow") + " log.".color("purple"))
 								end if
 							end for
@@ -96,14 +96,14 @@ x = function(ip, port)
 			end for
 		end function
 		
-		process("Bank.txt", Bank) //process getting bank files
-		process("Mail.txt", Mail) //process getting mail files
+		process("Bank.txt", Bank) //--process getting bank files
+		process("Mail.txt", Mail) //--process getting mail files
 		pfound = false
 		print("Checking ".color("lightblue") + "passwd".color("white") + " file...".color("purple"))
 		for file in com.File("/etc/").get_files()
-			if file.name == "passwd" then //finally go for machine passwords root and other users
-				pfound = true //flag value true if we find the passwd file
-				if not file.has_permission("r") then //permission check
+			if file.name == "passwd" then //--finally go for machine passwords root and other users
+				pfound = true //--flag value true if we find the passwd file
+				if not file.has_permission("r") then //--permission check
 					print("DENIED: ".color("red") + file.path.color("yellow") + " read permissions.".color("red"))
 					break
 				else
@@ -112,7 +112,7 @@ x = function(ip, port)
 						addData("IP " + ip, pswd)
 						print("IP ".color("purple") + (ip + "").color("white"))
 						for line in file.get_content.split(char(10))
-							if line == "" then continue //skip if empty
+							if line == "" then continue //--skip if empty
 							print(line.color("white"))
 							addData(line, pswd)
 						end for
@@ -129,7 +129,7 @@ x = function(ip, port)
 	loot(result)
 end function
 
-while 1 //and then and then and then and then
-	targ = findssh() //get attack coordinates
-	x(targ[0], targ[1]) //LOOT!
+while 1 //--and then and then and then and then
+	targ = findssh() //--get attack coordinates
+	x(targ[0], targ[1]) //--LOOT!
 end while

@@ -1,4 +1,4 @@
-//Usage: md5 [value]
+//--Usage: md5 [value]
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")

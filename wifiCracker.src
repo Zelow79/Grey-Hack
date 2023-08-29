@@ -1,13 +1,13 @@
-// 
-// $$$$$$$$\          $$\                         
-// \____$$  |         $$ |                        
-//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
-//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
-//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
-//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
-// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
-// \________|\_______|\__| \______/  \_____\____/ 
-// 
+//-- 
+//-- $$$$$$$$\          $$\                         
+//-- \____$$  |         $$ |                        
+//--     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//--    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//--   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//--  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+//-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+//-- \________|\_______|\__| \______/  \_____\____/ 
+//-- 
 crypto = include_lib("/lib/crypto.so")
 if not crypto then
 	crypto = include_lib(current_path + "/crypto.so")
@@ -18,31 +18,31 @@ if not crypto then
 end if
 computer = get_shell.host_computer
 wifi = "wlan0"
-networkcard = computer.network_devices.split(char(10))[computer.network_devices.indexOf(wifi)] //check if network has wifi card
+networkcard = computer.network_devices.split(char(10))[computer.network_devices.indexOf(wifi)] //--check if network has wifi card
 if networkcard == null then exit("No wifi card found on PC.")
 
-if networkcard.split(" ")[2] != "False" then //check wifi is enabled
+if networkcard.split(" ")[2] != "False" then //--check wifi is enabled
 	wifiFile = "wifi_pswds.txt"
-	computer.touch(current_path, wifiFile) //create wifi_pswds.txt file if needed
+	computer.touch(current_path, wifiFile) //--create wifi_pswds.txt file if needed
 	file = computer.File(current_path + "/" + wifiFile)
-	listen = crypto.airmon("start", wifi) //start listening on wifi card
+	listen = crypto.airmon("start", wifi) //--start listening on wifi card
 	networks = computer.wifi_networks(wifi)
 	info = "BSSID PWR ESSID PSWD"
 	for network in networks
-		pwr = network.split(" ")[1].remove("%").to_int //find network signal strength
-		if pwr < 10 then continue //skip slower targets
-		crypto.aireplay(network.split(" ")[0], network.split(" ")[2], ceil(300000/pwr)) //start receiving packets to make file.cap
-		wait() //hoping a wait between "file.cap" creation and locating may help prevent crash
+		pwr = network.split(" ")[1].remove("%").to_int //--find network signal strength
+		if pwr < 10 then continue //--skip slower targets
+		crypto.aireplay(network.split(" ")[0], network.split(" ")[2], ceil(300000/pwr)) //--start receiving packets to make file.cap
+		wait() //--hoping a wait between "file.cap" creation and locating may help prevent crash
 		x = computer.File(home_dir() + "/file.cap")
-		if x == null then exit("aircrack: file not found: ") //check for file.cap cannot proceed without it
-		pswd = crypto.aircrack(x.path) //crack file.cap for password
-		info = info + char(10) + network + " " + pswd //add results to info
+		if x == null then exit("aircrack: file not found: ") //--check for file.cap cannot proceed without it
+		pswd = crypto.aircrack(x.path) //--crack file.cap for password
+		info = info + char(10) + network + " " + pswd //--add results to info
 	end for
-	file.set_content(format_columns(info)) //save logged wifi information in wifi_pswds.txt
-	print(format_columns(info)) //also print information to terminal
+	file.set_content(format_columns(info)) //--save logged wifi information in wifi_pswds.txt
+	print(format_columns(info)) //--also print information to terminal
 else
 	print("Wifi card is disabled.")
 	print("Host network devices:")
 	output = "Interface Chipset Monitoring" + char(10) + computer.network_devices
-	print(format_columns(output)) //show status of network to help explain why script failed
+	print(format_columns(output)) //--show status of network to help explain why script failed
 end if
