@@ -28,29 +28,25 @@ comp = get_shell.host_computer
 crypto = include_lib("/lib/crypto.so")
 if not crypto then crypto = include_lib(current_path + "/crypto.so")
 if not crypto then exit("crypto.so not found in /lib or current dir.")
-passB = comp.File("/home/Zelow/yoinked/Passwords.txt")
-
-check = function(value)
-	for line in passB.get_content.split(char(10))
-		if line.split(":")[1] == value then return line.split(":")[0]
-	end for
-	return false
-end function
+import_code("/home/Zelow/pwdb.src")
 
 if params[0].len != 32 then exit("Invalid hash format. Should be 32 characters long.".rainbow())
-result = check(params[0])
+result = hashBash(params[0])
 
 if result then
-	outbound = "Password found in bank: " + check(params[0])
+	outbound = "Password found in bank: " + hashBash(params[0])
 	exit(outbound.rainbow())
 else
 	print("Deciphering hash...".rainbow())
 	pass = crypto.decipher(params[0])
-	print pass
 	if pass != null then
+		print pass
 		outbound = "Deciphered password: " + pass
 		print(outbound.rainbow())
 		//--log password in password bank
-		passB.set_content(passB.get_content + char(10) + pass + ":" + md5(pass))
+		addData(pass + ":" + md5(pass), HashBank)
+		//passB.set_content(passB.get_content + char(10) + pass + ":" + md5(pass))
+	else
+		print(program_path.split("/")[-1] + " failed.".color("red"))
 	end if
 end if
