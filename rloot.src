@@ -23,13 +23,15 @@ if not met then exit("Error: Can't find metaxploit library in the /lib path or t
 //--import password database code
 import_code("/home/Zelow/pwdb.src")
 
-//--create folder if needed
+//--create folders if needed
 mypc.create_folder(home_dir, "exploitBank")
+mypc.create_folder(home_dir + "exploitBank", "Computer")
 //--create files if needed
-mypc.touch(home_dir + "/exploitBank", "routerComputer.txt")
+touched = mypc.touch(home_dir + "/exploitBank/Computer", "router.txt")
 //--file locating
-exploits = mypc.File(home_dir + "/exploitBank/routerComputer.txt")
-
+exploits = mypc.File(home_dir + "/exploitBank/Computer/router.txt")
+//--if file needed to be touched add headliner
+if typeof(touched) == "number" then exploits.set_content("memaddress exploitvalue //libversion Computerlevelgained and -addtional info/req")
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")
@@ -52,8 +54,12 @@ x = function(ip)
 	metaLib = net_session.dump_lib
 	for device in router.devices_lan_ip()
 		result = 0
-		exqty = exploits.get_content.split(char(10)).len - 1
-		if exqty < 1 then return //--if no exploits are found halt
+		exqty = 0
+		if exploits.get_content.split(char(10)).len > 1 then exqty = exploits.get_content.split(char(10)).len - 1
+		if exqty < 2 then
+			exit("Terminating, no exploits found in ".color("red") + exploits.path.color("yellow")) 
+			return //--if no exploits are found halt
+		end if
 		print((exqty + "").color("white") + " exploits found...".color("purple"))
 		for line in exploits.get_content.split(char(10)) //--find exploit to get Computer access
 			if result then break //--break loop when we get a result
