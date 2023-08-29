@@ -60,7 +60,7 @@ end function
 
 x = function(ip, port)
 	net = met.net_use(ip, port)
-	if not net then print("Error: can't connect to net session")
+	if not net then exit("Error: can't connect to net session")
 	metaLib = net.dump_lib
 	result = 0
 	exqty = 0

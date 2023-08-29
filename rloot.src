@@ -47,10 +47,10 @@ end function
 
 x = function(ip)
 	router = get_router(ip)
-	if router == null then return //--print("scanrouter: ip address not found")
+	if router == null then return //--exit("scanrouter: ip address not found")
 	ipAddress = router.public_ip()
 	net_session = met.net_use(ipAddress)
-	if not net_session then return //--print("Error: can't connect to net session")
+	if not net_session then return //--exit("Error: can't connect to net session")
 	metaLib = net_session.dump_lib
 	for device in router.devices_lan_ip()
 		result = 0
