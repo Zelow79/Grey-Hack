@@ -8,7 +8,11 @@
 //-- $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
 //-- \________|\_______|\__| \______/  \_____\____/ 
 //-- 
-if params.len > 1 or (params.len == 1 and params[0] == "-h") then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] </b>")
+//-- for exploiting router will all Computer exploits known
+//-- on all lan ips and print/log all passwords/accounts found.
+//-- allows optional paramater for IP to perform rloot on a
+//-- targeted IP address, if left blanks loops random IPs.
+if params.len >= 1 or (params.len == 1 and params[0] == "-h") then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] </b>")
 if params.len > 0 and not is_valid_ip(params[0]) then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] </b>")
 mypc = get_shell.host_computer
 met = include_lib("/lib/metaxploit.so")
@@ -16,35 +20,19 @@ if not met then
     met = include_lib(current_path + "/metaxploit.so")
 end if
 if not met then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+//--import password database code
+import_code("/home/Zelow/pwdb.src")
 
 //--create folder if needed
-mypc.create_folder(home_dir, "yoinked")
 mypc.create_folder(home_dir, "exploitBank")
 //--create files if needed
-files = ["Bank.txt", "Mail.txt", "passwd"]
-for file in files
-	mypc.touch(home_dir + "/yoinked", file)
-end for
 mypc.touch(home_dir + "/exploitBank", "routerComputer.txt")
 //--file locating
 exploits = mypc.File(home_dir + "/exploitBank/routerComputer.txt")
-bank = mypc.File(home_dir + "/yoinked/Bank.txt")
-mail = mypc.File(home_dir + "/yoinked/Mail.txt")
-pswd = mypc.File(home_dir + "/yoinked/passwd")
 
 string.color = function(code)
   return "<color=""" + code + """>" + self + "</color>"
 end function //--"Hello World".color("red")
-
-fileCheck = function(file1, file2) //--check for matching file line
-	verdict = false
-	for line in file1.get_content.split(char(10))
-		for line2 in file2.get_content.split(char(10))
-			if line == line2 then verdict = true
-		end for
-	end for
-	return verdict
-end function
 
 genip = function()
 	while 1
@@ -57,10 +45,10 @@ end function
 
 x = function(ip)
 	router = get_router(ip)
-	if router == null then exit("scanrouter: ip address not found")
+	if router == null then return //--print("scanrouter: ip address not found")
 	ipAddress = router.public_ip()
 	net_session = met.net_use(ipAddress)
-	if not net_session then exit("Error: can't connect to net session")
+	if not net_session then return //--print("Error: can't connect to net session")
 	metaLib = net_session.dump_lib
 	for device in router.devices_lan_ip()
 		result = 0
@@ -74,52 +62,54 @@ x = function(ip)
 		end for
 	
 		if not result then //--if still no result after looping all exploits halt
-			print(ip.color("white") + ": " + "failed".color("red") + " to loot.".color("purple"))
+			print(ip.color("white") + ": " + "failed".color("red") + " to loot".color("purple"))
 			return
 		end if
 	
-		loot = function(com) //--once exploit has us in get what we can.
-			process = function(f) //--f is a file object for the file we want
-				print("Checking ".color("lightblue") + f.name.color("white") + " file...".color("purple"))
-				if not com.File("/home/").has_permission("r") then print("/home read permission.".color("red"))
+		loot = function(com) //--once exploit has us in, get what we can.
+			
+			process = function(fileName, cluster) //--fileName of the file we want and cluster to save the info in
+				print("Checking ".color("lightblue") + fileName.color("white") + " file...".color("purple"))
+				if not com.File("/home/").has_permission("r") then print("No /home read permission.".color("red"))
 				for folder in com.File("/home/").get_folders()
 					for file in com.File(folder.path + "/Config").get_files()
-						if file.name == f.name then //--find folder we want
+						if file.name == fileName then //--find folder we want
 							if not file.has_permission("r") then //--permission check
-								print("DENIED: ".color("red") + file.path.color("yellow") + " read permission.".color("red"))
+								print("DENIED: ".color("red") + file.path.color("yellow") + " No read permission.".color("red"))
 							else
-								if not fileCheck(file, f) then //--check if we already have this information logged
-									print(file.get_content.color("white") + " -Added to ".color("purple") + f.path.color("yellow"))
-									f.set_content(f.get_content + char(10) + file.get_content) //--log loot to f
-								else //--report when file is already in log
-									print("SKIPPED: ".color("orange") + file.get_content.split(":")[0].color("white") + " acount exists in ".color("purple") + f.path.color("yellow") + " log.".color("purple"))
-								end if
+								for line in file.get_content.split(char(10))
+									if not lineCheck(line, cluster) then //--check if we already have this information logged
+										print(line.color("white") + " -Added to ".color("purple") + cluster.path.color("yellow"))
+										addData(line, cluster) //--log loot to cluster
+									else //--report when file is already in log
+										print("SKIPPED: ".color("orange") + line.split(":")[0].color("white") + " acount exists in ".color("purple") + cluster.path.color("yellow") + " log.".color("purple"))
+									end if
+								end for
 							end if
 						end if
 					end for
 				end for
 			end function
 		
-			process(bank) //--process getting bank files
-			process(mail) //--process getting mail files
+			process("Bank.txt", Bank) //--process getting bank files
+			process("Mail.txt", Mail) //--process getting mail files
 			pfound = false
-			print("Checking ".color("lightblue") + pswd.name.color("white") + " file...".color("purple"))
+			print("Checking ".color("lightblue") + "passwd".color("white") + " file...".color("purple"))
 			for file in com.File("/etc/").get_files()
-				if file.name == pswd.name then //--finally go for machine passwords root and other users
+				if file.name == "passwd" then //--finally go for machine passwords root and other users
 					pfound = true //--flag value true if we find the passwd file
 					if not file.has_permission("r") then //--permission check
 						print("DENIED: ".color("red") + file.path.color("yellow") + " read permissions.".color("red"))
 						break
 					else
-						c = true //--start check for this ip in log
-						for line in pswd.get_content.split(char(10)) //--iterate log
-							if line == "IP " + ip then c = false //--if line in log matches what this would add flag false
-						end for
-						if c then //--if flag is true and we didn't find a record make record for this ip
+						if not lineCheck("IP " + ip, pswd) then
 							print(file.path.color("white") + " was found.".color("purple"))
-							output = "IP " + ip + char(10) + file.get_content
-							for line in output.split(char(10)) 
+							addData("IP " + ip, pswd)
+							print("IP ".color("purple") + (ip + "").color("white"))
+							for line in file.get_content.split(char(10))
+								if line == "" then continue //--skip if empty
 								print(line.color("white"))
+								addData(line, pswd)
 							end for
 							print("Was added to ".color("purple") + pswd.path.color("yellow")) //--print and log loot to pswd
 							pswd.set_content(pswd.get_content + char(10) + "IP " + ip + char(10) + file.get_content)
