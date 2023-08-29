@@ -11,12 +11,15 @@
 //--uses /home/usr/servlogs/ssh.txt generated from servicescanner and performs
 //--computer access exploits remotely via ssh to get all passwords. exploits used
 //--are found in home_dir
+if params.len != 2 and params.len != 0 then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] [?port]</b>")
+if params.len == 2 and not is_valid_ip(params[0]) then exit("<b>" + "Invalid IP</b>")
 mypc = get_shell.host_computer
 met = include_lib("/lib/metaxploit.so")
 if not met then
     met = include_lib(current_path + "/metaxploit.so")
 end if
 if not met then exit("Error: Can't find metaxploit library in the /lib path or the current folder")
+//--import password database code
 import_code("/home/Zelow/pwdb.src")
 
 //--create folder if needed
@@ -83,7 +86,7 @@ x = function(ip, port)
 							print("DENIED: ".color("red") + file.path.color("yellow") + " read permission.".color("red"))
 						else
 							for line in file.get_content.split(char(10))
-								if lineCheck(line, cluster) then //--check if we already have this information logged
+								if not lineCheck(line, cluster) then //--check if we already have this information logged
 									print(line.color("white") + " -Added to ".color("purple") + cluster.path.color("yellow"))
 									addData(line, cluster) //--log loot
 								else //--report when file is already in log
@@ -129,7 +132,11 @@ x = function(ip, port)
 	loot(result)
 end function
 
-while 1 //--and then and then and then and then
-	targ = findssh() //--get attack coordinates
-	x(targ[0], targ[1]) //--LOOT!
-end while
+if params.len == 2 then
+	x(params[0], params[1])
+else
+	while 1 //--and then and then and then and then
+		targ = findssh() //--get attack coordinates
+		x(targ[0], targ[1]) //--LOOT!
+	end while
+end if
