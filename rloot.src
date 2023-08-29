@@ -12,7 +12,7 @@
 //-- on all lan ips and print/log all passwords/accounts found.
 //-- allows optional paramater for IP to perform rloot on a
 //-- targeted IP address, if left blanks loops random IPs.
-if params.len >= 1 or (params.len == 1 and params[0] == "-h") then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] </b>")
+if params.len > 1 or (params.len == 1 and params[0] == "-h") then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] </b>")
 if params.len > 0 and not is_valid_ip(params[0]) then exit("<b>" + "Usage: " + program_path.split("/")[-1] + " [?ipAddress] </b>")
 mypc = get_shell.host_computer
 met = include_lib("/lib/metaxploit.so")
