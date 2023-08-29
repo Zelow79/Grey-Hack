@@ -111,7 +111,8 @@ x = function(ip, port)
 						print(file.path.color("white") + " was found.".color("purple"))
 						addData("IP " + ip, pswd)
 						print("IP ".color("purple") + (ip + "").color("white"))
-						for line in file.get_content.split(char(10)) 
+						for line in file.get_content.split(char(10))
+							if line == "" then continue //skip if empty
 							print(line.color("white"))
 							addData(line, pswd)
 						end for
