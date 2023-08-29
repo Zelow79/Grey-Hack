@@ -1,0 +1,134 @@
+// 
+// $$$$$$$$\          $$\                         
+// \____$$  |         $$ |                        
+//     $$  / $$$$$$\  $$ | $$$$$$\  $$\  $$\  $$\ 
+//    $$  / $$  __$$\ $$ |$$  __$$\ $$ | $$ | $$ |
+//   $$  /  $$$$$$$$ |$$ |$$ /  $$ |$$ | $$ | $$ |
+//  $$  /   $$   ____|$$ |$$ |  $$ |$$ | $$ | $$ |
+// $$$$$$$$\\$$$$$$$\ $$ |\$$$$$$  |\$$$$$\$$$$  |
+// \________|\_______|\__| \______/  \_____\____/ 
+// 
+mypc = get_shell.host_computer
+charLimit = 160000  //160000 game uses 160k character limit
+
+mypc.create_folder(home_dir, "yoinked") //create yoinked dir if needed
+clusters = ["Bank", "Mail", "pswd", "CBank", "CMail", "Cpswd", "HashBank"] //names for all the clusters
+for cluster in clusters
+	mypc.create_folder(home_dir + "/yoinked", cluster) //create any clusters that are needed
+end for
+Bank = mypc.File(home_dir + "/yoinked/Bank") //referencing folders that hold data
+Mail = mypc.File(home_dir + "/yoinked/Mail")
+pswd = mypc.File(home_dir + "/yoinked/pswd")
+CBank = mypc.File(home_dir + "/yoinked/CBank")
+CMail = mypc.File(home_dir + "/yoinked/CMail")
+Cpswd = mypc.File(home_dir + "/yoinked/Cpswd")
+HashBank = mypc.File(home_dir + "/yoinked/HashBank")
+
+//Terminology.
+//clusters are folders that hold the data and
+//data will refer to the files inside a cluster like Bank ie /Bank/0 Bank being the cluster
+//and 0 being the data.
+passCount = function(cluster)
+	if not cluster or not cluster.is_folder then return 0
+	count = 0
+	for dat in cluster.get_files
+		for line in dat.get_content.split(char(10))
+			if line.split(":").len == 2 then count = count + 1
+		end for
+	end for
+	return count
+end function
+
+getDataCharCount = function(data)
+	if not data then return null
+	return data.get_content.len
+end function
+
+getClusterCharCount = function(cluster)
+	if not cluster then return null
+	tally = 0
+	for data in prepData(cluster)
+		tally = tally + getDataCharCount(data)
+	end for
+	return tally
+end function
+
+//Construct a list of data *files* from a given cluster *folder* and
+//return that list. ie [fileObj, fileObj, fileObj] or null.
+prepData = function(cluster)
+	if not cluster or not cluster.is_folder then return null
+	list = []
+	if cluster.get_files.len >= 0 then
+		for dat in cluster.get_files
+			list.push({"file":dat, "name":dat.name})
+		end for
+		output = []
+		for x in list.sort("name")
+			output.push(x.file)
+		end for
+ 		return output
+	end if
+end function
+
+hashBash = function(value)
+	for data in prepData(HashBank)
+		if data.get_content.indexOf(char(10)) == null then
+			if data.get_content.indexOf(":") != null then
+				if data.get_content.split(":")[1] == value then return data.get_content.split(":")[0]
+			end if
+		return false
+		end if
+		for line in data.get_content.split(char(10))
+			if line.split(":")[1] == value then return line.split(":")[0]
+	    end for
+    end for
+	return false
+end function
+
+//Check all data in file *folder* for lineString. return true
+//if found and false otherwise. 
+lineCheck = function(lineString, cluster)
+	result = false
+	for data in prepData(cluster)
+		for line in data.get_content.split(char(10))
+			if line == lineString then result = true
+		end for
+	end for
+	return result
+end function
+
+addData = function(newString, cluster)
+    preppedData = prepData(cluster)
+    if not preppedData and preppedData != [] then return false
+    if lineCheck(newString, cluster) then return false
+	if preppedData.len > 0 then location = preppedData[preppedData.len - 1]
+    if preppedData.len > 0 and location.get_content.len + newString.len <= charLimit then
+        location.set_content(location.get_content + char(10) + newString) //--add new string to last data
+        return true
+    end if
+    if typeof(mypc.touch(cluster.path, (preppedData.len + ""))) != "string" then //--need to string number or get error
+        preppedData = prepData(cluster) //--reprep with new data
+        location = preppedData[preppedData.len - 1] //--get new last data
+        location.set_content(newString) //--set content to string for new data
+        return true
+    end if
+    return false
+end function
+
+//leaving stuff below for testing and debugging purposes
+//print hashBash("f22152afec12017f351f1cb7a6285863") //timber
+//addData("test1", Mail)
+//addData("test2", Mail)
+//addData("test3", Mail)
+//clear_screen()
+//print "Lines in /Bank: " + passCount(Bank)
+//print "Character count in /Bank/0: " + getDataCharCount(prepData(Bank)[0])
+//print "Character count in /Bank: " + getClusterCharCount(Bank)
+//datatestlist = []
+//for file in prepData(Bank)
+//	datatestlist.push(file.name)
+//end for
+//print "Data names in /Bank: " + datatestlist.join(", ")
+//checkTest = "fail" //linecheck intentional fail
+//print "Is """ + checkTest + """ in /Bank: " + lineCheck(checkTest, Bank)
+//print "Number of data in /Bank cluster: " + prepData(Bank).len
