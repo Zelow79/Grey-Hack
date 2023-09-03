@@ -1,32 +1,54 @@
 string.color = function(code)
-  return "<color=""" + code + """>" + self + "</color>"
+  return "<color=#" + code + ">" + self + "</color>"
 end function //--"Hello World".color("red")
 pc = get_shell.host_computer
-printLine = function(p)
-	r = p.name
-	space = "   "
-	if p.is_folder then
-		r = p.path + "/"
-		if p.path == "/" then r = p.path
-		space = " "
+returnLine = function(p)
+	r = p.path
+	c1 = "FFFF00"
+	if p.path == "/" then return p.permissions.color(c1) + " " + r.color(c1) + " o:[" + p.owner + "] g:[" + p.group + "]" + " - " + p.size.color("aaaaaa")
+	if r.split("/").len > 3 then r = "../" + r.split("/")[r.split("/").len - 2] + "/" + r.split("/")[r.split("/").len - 1]
+	if not p.is_folder then 
+		r = p.name
+		c1 = "44B1FF"
 	end if
-	c = "red"
-	if p.has_permission("r") then c = "yellow"
-	if p.has_permission("w") then c = "lightblue"
-	if p.has_permission("x") then c = "white"
-	print p.permissions + space + r.color(c) + " o:[" + p.owner + "] g:[" + p.group + "]" + " - " + p.size.color("grey")
+	c2 = "FF0000"
+	if p.has_permission("r") then c2 = "FFFF00"
+	if p.has_permission("w") then c2 = "44B1FF"
+	if p.has_permission("x") then c2 = "FFFFFF"
+	return p.permissions.color(c2) + " " + r.color(c1) + " o:[" + p.owner + "] g:[" + p.group + "]" + " - " + p.size.color("aaaaaa")
 end function
+
+find = function(start)
+	output = []
+	pathfinder = function(start)
+		file = pc.File(start)
+		if file.is_folder then
+			output.push(returnLine(file))
+			for f in file.get_folders
+				pathfinder(f.path)
+			end for
+			for f in file.get_files
+				output.push(returnLine(f))
+			end for
+		end if
+	end function
+	pathfinder(start)
+	print(format_columns(output.join(char(10))))
+end function
+
 pathfinder = function(start)
 	file = pc.File(start)
+	output = []
 	if file.is_folder then
-		printLine(file)
+		output.push(returnLine(file))
 		for f in file.get_folders
 			pathfinder(f.path)
 		end for
 		for f in file.get_files
-			printLine(f)
+			output.push(returnLine(f))
 		end for
+		if output.len > 0 then print(format_columns(output.join(char(10))))
 	end if
 end function
 
-pathfinder("/")
+find("/")
