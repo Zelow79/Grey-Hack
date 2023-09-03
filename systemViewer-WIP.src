@@ -1,0 +1,32 @@
+string.color = function(code)
+  return "<color=""" + code + """>" + self + "</color>"
+end function //--"Hello World".color("red")
+pc = get_shell.host_computer
+printLine = function(p)
+	r = p.name
+	space = "   "
+	if p.is_folder then
+		r = p.path + "/"
+		if p.path == "/" then r = p.path
+		space = " "
+	end if
+	c = "red"
+	if p.has_permission("r") then c = "yellow"
+	if p.has_permission("w") then c = "lightblue"
+	if p.has_permission("x") then c = "white"
+	print p.permissions + space + r.color(c) + " o:[" + p.owner + "] g:[" + p.group + "]" + " - " + p.size.color("grey")
+end function
+pathfinder = function(start)
+	file = pc.File(start)
+	if file.is_folder then
+		printLine(file)
+		for f in file.get_folders
+			pathfinder(f.path)
+		end for
+		for f in file.get_files
+			printLine(f)
+		end for
+	end if
+end function
+
+pathfinder("/")
