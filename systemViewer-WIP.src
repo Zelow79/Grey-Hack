@@ -51,4 +51,49 @@ pathfinder = function(start)
 	end if
 end function
 
+lockup = function(start, unlock)
+	file = pc.File(start)
+	lock = "-"
+	if unlock then lock = "+"
+	file.chmod("u" + lock + "wrx", 1)
+	file.chmod("g" + lock + "wrx", 1)
+	file.chmod("o" + lock + "wrx", 1)
+	file.set_owner("root", 1)
+	file.set_group("root", 1)
+end function
+
+noOthers = function(start, unlock)
+	file = pc.File(start)
+	lock = "-"
+	if unlock then lock = "+"
+	file.chmod("o" + lock + "wrx", 1)
+	file.set_owner("root", 1)
+	file.set_group("root", 1)
+end function
+
+clearTrash = function(start)
+	file = pc.File(start)
+	if file.is_folder then
+		for f in file.get_folders
+			if f.name == ".Trash" then
+				for fi in f.get_files
+					fi.delete
+				end for
+			end if
+			clearTrash(f.path)
+		end for
+	end if
+end function
+
+//dir = "/sys"
+//l = 1
+//if params.len > 0 then dir = params[0]
+//if params.len > 1 and typeof(params[1].to_int) == "number" then l = params[1].to_int
+//lockup("/sys", 0)
+//lockup("/root", 0)
+//lockup("/var", 0)
+//lockup("/usr", 1)
+//lockup("/boot", 0)
+//noOthers("/")
+//clearTrash("/")
 find("/")
